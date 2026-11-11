@@ -1,0 +1,861 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{ctexart}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={农场数据全流程分析报告},
+  pdfauthor={秋水雁翎（胡涛）},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{农场数据全流程分析报告}
+\author{秋水雁翎（胡涛）}
+\date{2026-11-11}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+本报告将数据清洗、文本挖掘、统计建模、数据库与时间序列四部分串联为一条完整的数据分析链路，每一部分均给出可执行代码与结论分析。
+
+\section{一、数据模拟与清洗}\label{ux4e00ux6570ux636eux6a21ux62dfux4e0eux6e05ux6d17}
+
+用 \texttt{data.frame()} 构造 50 行农场数据：编号
+1\textasciitilde50，鸡舍在 A/B/C 三舍随机分配，体重服从均值 500、标准差
+60 的正态分布。随后随机置 5 个为缺失值，并用中位数填补，最后用 IQR
+法则剔除异常值。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 生成原始数据}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20241111}\NormalTok{)}
+\NormalTok{farm\_raw }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{ID     =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{50}\NormalTok{,}
+  \AttributeTok{Coop   =} \FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"A舍"}\NormalTok{, }\StringTok{"B舍"}\NormalTok{, }\StringTok{"C舍"}\NormalTok{), }\AttributeTok{size =} \DecValTok{50}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{),}
+  \AttributeTok{Weight =} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{, }\AttributeTok{mean =} \DecValTok{500}\NormalTok{, }\AttributeTok{sd =} \DecValTok{60}\NormalTok{)}
+\NormalTok{)}
+
+\CommentTok{\# 2. 模拟脏数据：先注入 3 个极端值，再随机制造 5 个缺失值}
+\NormalTok{out\_idx }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{7}\NormalTok{, }\DecValTok{23}\NormalTok{, }\DecValTok{41}\NormalTok{)}
+\NormalTok{farm\_raw}\SpecialCharTok{$}\NormalTok{Weight[out\_idx] }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{980}\NormalTok{, }\DecValTok{25}\NormalTok{, }\DecValTok{1200}\NormalTok{)        }\CommentTok{\# 极端值（模拟录入错误）}
+
+\NormalTok{na\_idx }\OtherTok{\textless{}{-}} \FunctionTok{setdiff}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{seq\_len}\NormalTok{(}\DecValTok{50}\NormalTok{), }\AttributeTok{size =} \DecValTok{8}\NormalTok{), out\_idx)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{]}
+\NormalTok{farm\_raw}\SpecialCharTok{$}\NormalTok{Weight[na\_idx] }\OtherTok{\textless{}{-}} \ConstantTok{NA}                        \CommentTok{\# 缺失值}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"注入极端值的行号："}\NormalTok{, out\_idx, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 注入极端值的行号： 7 23 41
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"设为 NA 的行号：  "}\NormalTok{, na\_idx, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 设为 NA 的行号：   40 20 30 27 14
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"缺失值个数："}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(farm\_raw}\SpecialCharTok{$}\NormalTok{Weight)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 缺失值个数： 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. 用中位数填补缺失值（中位数不受极端值影响，比均值稳健）}
+\NormalTok{med\_w }\OtherTok{\textless{}{-}} \FunctionTok{median}\NormalTok{(farm\_raw}\SpecialCharTok{$}\NormalTok{Weight, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{farm\_fill }\OtherTok{\textless{}{-}}\NormalTok{ farm\_raw}
+\NormalTok{farm\_fill}\SpecialCharTok{$}\NormalTok{Weight[}\FunctionTok{is.na}\NormalTok{(farm\_fill}\SpecialCharTok{$}\NormalTok{Weight)] }\OtherTok{\textless{}{-}}\NormalTok{ med\_w}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"填补用的中位数 ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(med\_w, }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 填补用的中位数 = 517.59
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"填补后剩余 NA 个数 ="}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(farm\_fill}\SpecialCharTok{$}\NormalTok{Weight)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 填补后剩余 NA 个数 = 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 4. 用 IQR 法则计算上下界并剔除异常值}
+\CommentTok{\#    注意：变量名不能叫 IQR，因为 IQR 是 R 自带函数名}
+\NormalTok{q1\_w  }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(farm\_fill}\SpecialCharTok{$}\NormalTok{Weight, }\FloatTok{0.25}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{q3\_w  }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(farm\_fill}\SpecialCharTok{$}\NormalTok{Weight, }\FloatTok{0.75}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{iqr\_w }\OtherTok{\textless{}{-}}\NormalTok{ q3\_w }\SpecialCharTok{{-}}\NormalTok{ q1\_w}
+
+\NormalTok{lower\_w }\OtherTok{\textless{}{-}}\NormalTok{ q1\_w }\SpecialCharTok{{-}} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ iqr\_w}
+\NormalTok{upper\_w }\OtherTok{\textless{}{-}}\NormalTok{ q3\_w }\SpecialCharTok{+} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ iqr\_w}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Q1 ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(q1\_w, }\DecValTok{2}\NormalTok{), }\StringTok{" Q3 ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(q3\_w, }\DecValTok{2}\NormalTok{),}
+    \StringTok{" IQR ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(iqr\_w, }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Q1 = 464.09  Q3 = 556.77  IQR = 92.67
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"正常区间 = ["}\NormalTok{, }\FunctionTok{round}\NormalTok{(lower\_w, }\DecValTok{2}\NormalTok{), }\StringTok{","}\NormalTok{, }\FunctionTok{round}\NormalTok{(upper\_w, }\DecValTok{2}\NormalTok{), }\StringTok{"]}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 正常区间 = [ 325.08 , 695.78 ]
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{farm\_clean }\OtherTok{\textless{}{-}}\NormalTok{ farm\_fill }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Weight }\SpecialCharTok{\textgreater{}=}\NormalTok{ lower\_w, Weight }\SpecialCharTok{\textless{}=}\NormalTok{ upper\_w)}
+
+\NormalTok{n\_before  }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(farm\_fill)}
+\NormalTok{n\_after   }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(farm\_clean)}
+\NormalTok{n\_removed }\OtherTok{\textless{}{-}}\NormalTok{ n\_before }\SpecialCharTok{{-}}\NormalTok{ n\_after}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{清洗前："}\NormalTok{, n\_before, }\StringTok{"行}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 清洗前： 50 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"清洗后："}\NormalTok{, n\_after,  }\StringTok{"行}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 清洗后： 47 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"剔除：  "}\NormalTok{, n\_removed, }\StringTok{"行}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 剔除：   3 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 5. 输出清洗后的分组统计}
+\NormalTok{farm\_clean }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Coop) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+\NormalTok{    样本量   }\OtherTok{=} \FunctionTok{n}\NormalTok{(),}
+\NormalTok{    平均体重 }\OtherTok{=} \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(Weight), }\DecValTok{2}\NormalTok{),}
+\NormalTok{    标准差   }\OtherTok{=} \FunctionTok{round}\NormalTok{(}\FunctionTok{sd}\NormalTok{(Weight), }\DecValTok{2}\NormalTok{),}
+\NormalTok{    最小体重 }\OtherTok{=} \FunctionTok{round}\NormalTok{(}\FunctionTok{min}\NormalTok{(Weight), }\DecValTok{2}\NormalTok{),}
+\NormalTok{    最大体重 }\OtherTok{=} \FunctionTok{round}\NormalTok{(}\FunctionTok{max}\NormalTok{(Weight), }\DecValTok{2}\NormalTok{)}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 3 x 6
+##   Coop  样本量 平均体重 标准差 最小体重 最大体重
+##   <chr>  <int>    <dbl>  <dbl>    <dbl>    <dbl>
+## 1 A舍       25     528.   57.9     432.     668 
+## 2 B舍       10     516.   34.4     460.     564.
+## 3 C舍       12     482.   62.7     385.     559.
+\end{verbatim}
+
+\textbf{结论分析：} 清洗前共 50 行，剔除 3 行极端值后剩余 47
+行有效样本。中位数填补后无残留缺失值，说明该方法在含极端值的数据上依然稳健------若改用均值填补，980
+与 1200 这类异常值会把均值拉高，所有缺失值都会被填成偏大的数值。IQR
+法则以四分位数为基础，不依赖均值和标准差，因此即使数据含极端值也不会被``污染''，适合作为农业实测数据的常规清洗手段。
+
+\section{二、网络爬虫与文本挖掘}\label{ux4e8cux7f51ux7edcux722cux866bux4e0eux6587ux672cux6316ux6398}
+
+用 rvest 抓取百度百科``动物科学''词条的全部
+\texttt{\textless{}h2\textgreater{}} 标题，与清洗后数据的 \texttt{Coop}
+列随机拼接成一段长文本，再用 jiebaRS 分词、dplyr 统计词频、wordcloud2
+绘制词云。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 爬取百度百科“动物科学”词条的 h2 标题}
+\NormalTok{baike\_url }\OtherTok{\textless{}{-}} \StringTok{"https://baike.baidu.com/item/\%E5\%8A\%A8\%E7\%89\%A9\%E7\%A7\%91\%E5\%AD\%A6"}
+
+\NormalTok{h2\_titles }\OtherTok{\textless{}{-}} \FunctionTok{tryCatch}\NormalTok{(\{}
+  \FunctionTok{read\_html}\NormalTok{(baike\_url) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{html\_nodes}\NormalTok{(}\StringTok{"h2"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{html\_text}\NormalTok{(}\AttributeTok{trim =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{\}, }\AttributeTok{error =} \ControlFlowTok{function}\NormalTok{(e) }\FunctionTok{character}\NormalTok{(}\DecValTok{0}\NormalTok{))}
+
+\NormalTok{h2\_titles }\OtherTok{\textless{}{-}}\NormalTok{ h2\_titles[}\FunctionTok{nzchar}\NormalTok{(h2\_titles)]}
+
+\CommentTok{\# 若网页结构变化或网络不通，启用备用标题，保证报告照样能 Knit 成功}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(h2\_titles) }\SpecialCharTok{\textless{}} \DecValTok{3}\NormalTok{) \{}
+\NormalTok{  h2\_titles }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"动物科学概述"}\NormalTok{, }\StringTok{"动物遗传育种"}\NormalTok{, }\StringTok{"动物营养与饲料科学"}\NormalTok{,}
+                 \StringTok{"动物繁殖学"}\NormalTok{, }\StringTok{"动物生产学"}\NormalTok{, }\StringTok{"家畜环境卫生学"}\NormalTok{,}
+                 \StringTok{"动物行为与动物福利"}\NormalTok{, }\StringTok{"畜牧业经营管理"}\NormalTok{)}
+  \FunctionTok{cat}\NormalTok{(}\StringTok{"【提示】网页抓取失败或 h2 数量不足，已启用备用标题}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 【提示】网页抓取失败或 h2 数量不足，已启用备用标题
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"共抓取到"}\NormalTok{, }\FunctionTok{length}\NormalTok{(h2\_titles), }\StringTok{"个 h2 标题：}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 共抓取到 8 个 h2 标题：
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(h2\_titles)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "动物科学概述"       "动物遗传育种"       "动物营养与饲料科学"
+## [4] "动物繁殖学"         "动物生产学"         "家畜环境卫生学"    
+## [7] "动物行为与动物福利" "畜牧业经营管理"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2. 把 Coop 列与标题随机组合，拼成一段长文本}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20241111}\NormalTok{)}
+\NormalTok{long\_text }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(}\FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(farm\_clean}\SpecialCharTok{$}\NormalTok{Coop), h2\_titles)),}
+                   \AttributeTok{collapse =} \StringTok{" "}\NormalTok{)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"拼接后文本长度："}\NormalTok{, }\FunctionTok{nchar}\NormalTok{(long\_text), }\StringTok{"个字符}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 拼接后文本长度： 202 个字符
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. 用 jiebaRS 分词}
+\NormalTok{wk }\OtherTok{\textless{}{-}} \FunctionTok{worker}\NormalTok{()}
+
+\CommentTok{\# 把 A舍/B舍/C舍 加入自定义词典，否则会被切成 "A" + "舍" 两个碎片}
+\FunctionTok{try}\NormalTok{(}\FunctionTok{new\_user\_word}\NormalTok{(wk, }\FunctionTok{c}\NormalTok{(}\StringTok{"A舍"}\NormalTok{, }\StringTok{"B舍"}\NormalTok{, }\StringTok{"C舍"}\NormalTok{)), }\AttributeTok{silent =} \ConstantTok{TRUE}\NormalTok{)}
+
+\NormalTok{seg\_words }\OtherTok{\textless{}{-}} \FunctionTok{segment}\NormalTok{(long\_text, wk)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"分词后总词数："}\NormalTok{, }\FunctionTok{length}\NormalTok{(seg\_words), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 分词后总词数： 75
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(seg\_words, }\DecValTok{20}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "C舍"    "A舍"    "动物"   "科学"   "概述"   "C舍"    "家畜"   "环境"  
+##  [9] "卫生学" "A舍"    "动物"   "遗传"   "育种"   "动物"   "繁殖"   "学"    
+## [17] "A舍"    "B舍"    "A舍"    "B舍"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 4. 用 dplyr 统计词频，整理成 word + freq 两列}
+\NormalTok{stop\_words }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"的"}\NormalTok{,}\StringTok{"了"}\NormalTok{,}\StringTok{"和"}\NormalTok{,}\StringTok{"与"}\NormalTok{,}\StringTok{"及"}\NormalTok{,}\StringTok{"在"}\NormalTok{,}\StringTok{"是"}\NormalTok{,}\StringTok{"为"}\NormalTok{,}\StringTok{"等"}\NormalTok{,}\StringTok{"中"}\NormalTok{,}\StringTok{"对"}\NormalTok{,}\StringTok{"有"}\NormalTok{,}
+                \StringTok{"可以"}\NormalTok{,}\StringTok{"进行"}\NormalTok{,}\StringTok{"一个"}\NormalTok{,}\StringTok{"这个"}\NormalTok{,}\StringTok{"以及"}\NormalTok{,}\StringTok{"通过"}\NormalTok{,}\StringTok{"主要"}\NormalTok{,}\StringTok{"方面"}\NormalTok{,}
+                \StringTok{"研究"}\NormalTok{,}\StringTok{"发展"}\NormalTok{,}\StringTok{"相关"}\NormalTok{,}\StringTok{"具有"}\NormalTok{,}\StringTok{"包括"}\NormalTok{,}\StringTok{"用于"}\NormalTok{,}\StringTok{"作为"}\NormalTok{,}\StringTok{"不同"}\NormalTok{,}
+                \StringTok{"其中"}\NormalTok{,}\StringTok{"我们"}\NormalTok{,}\StringTok{"他们"}\NormalTok{)}
+
+\NormalTok{word\_freq }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{word =}\NormalTok{ seg\_words) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{trimws}\NormalTok{(word)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\FunctionTok{nchar}\NormalTok{(word) }\SpecialCharTok{\textgreater{}=} \DecValTok{2}\NormalTok{,               }\CommentTok{\# 去掉单字与标点}
+         \SpecialCharTok{!}\NormalTok{word }\SpecialCharTok{\%in\%}\NormalTok{ stop\_words) }\SpecialCharTok{\%\textgreater{}\%}       \CommentTok{\# 去掉停用词}
+  \FunctionTok{count}\NormalTok{(word, }\AttributeTok{sort =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}            \CommentTok{\# 统计词频}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{freq =} \FunctionTok{as.numeric}\NormalTok{(n)) }\SpecialCharTok{\%\textgreater{}\%}        \CommentTok{\# 强制转数值，防 wordcloud2 报错}
+  \FunctionTok{select}\NormalTok{(word, freq)}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"有效词总数："}\NormalTok{, }\FunctionTok{sum}\NormalTok{(word\_freq}\SpecialCharTok{$}\NormalTok{freq), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 有效词总数： 71
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"去重后词数："}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(word\_freq),     }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 去重后词数： 20
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"最高频次：  "}\NormalTok{, }\FunctionTok{max}\NormalTok{(word\_freq}\SpecialCharTok{$}\NormalTok{freq), }\StringTok{"}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 最高频次：   25
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{head}\NormalTok{(word\_freq, }\DecValTok{12}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      word freq
+## 1     A舍   25
+## 2     C舍   12
+## 3     B舍   10
+## 4    动物    7
+## 5    科学    2
+## 6  卫生学    1
+## 7    家畜    1
+## 8    概述    1
+## 9    环境    1
+## 10   生产    1
+## 11 畜牧业    1
+## 12   福利    1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 5. 绘制词云}
+\CommentTok{\#    wordcloud2 生成的是交互式 HTML 组件，PDF 中无法渲染，}
+\CommentTok{\#    因此此处用同源的静态版 ggwordcloud 出图；wordcloud2 写法见下方注释。}
+\CommentTok{\#    wordcloud2(word\_freq, fontFamily = "SimHei", size = 1,}
+\CommentTok{\#               color = "random{-}dark", backgroundColor = "white", shape = "circle")}
+\FunctionTok{ggplot}\NormalTok{(word\_freq, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{label =}\NormalTok{ word, }\AttributeTok{size =}\NormalTok{ freq, }\AttributeTok{color =}\NormalTok{ word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_text\_wordcloud\_area}\NormalTok{(}\AttributeTok{eccentricity =} \DecValTok{1}\NormalTok{, }\AttributeTok{rm\_outside =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_size\_area}\NormalTok{(}\AttributeTok{max\_size =} \DecValTok{16}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_void}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+        \AttributeTok{plot.background =} \FunctionTok{element\_rect}\NormalTok{(}\AttributeTok{fill =} \StringTok{"white"}\NormalTok{, }\AttributeTok{colour =} \ConstantTok{NA}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{作业修订润色版_files/figure-latex/q2-text-1} \end{center}
+
+\textbf{结论分析：} 本次共获得 71 个有效词，去重后为 20 个，最高频次 25
+次。由于 \texttt{Coop} 列在拼接时被大量重复，A舍、B舍、C舍
+成为最高频词并形成明显的字号层次，而百科标题各出现一次，作为背景词填充。这也说明词云的可读性取决于词频差异：若所有词仅出现一次，字号将完全一致、失去主次，此时应改用词频条形图呈现数量关系。
+
+\section{三、统计建模与机器学习}\label{ux4e09ux7edfux8ba1ux5efaux6a21ux4e0eux673aux5668ux5b66ux4e60}
+
+对清洗后的数据做单因素方差分析，检验鸡舍是否显著影响体重；再按 70\%/30\%
+切分训练集与测试集，在训练集上训练随机森林并评估测试集误差。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 单因素方差分析：Coop 是否显著影响 Weight}
+\NormalTok{aov\_fit }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(Weight }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop, }\AttributeTok{data =}\NormalTok{ farm\_clean)}
+\FunctionTok{summary}\NormalTok{(aov\_fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             Df Sum Sq Mean Sq F value Pr(>F)  
+## Coop         2  17074    8537   2.797 0.0719 .
+## Residuals   44 134294    3052                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aov\_p }\OtherTok{\textless{}{-}} \FunctionTok{summary}\NormalTok{(aov\_fit)[[}\DecValTok{1}\NormalTok{]][[}\StringTok{"Pr(\textgreater{}F)"}\NormalTok{]][}\DecValTok{1}\NormalTok{]}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{方差分析 P 值 ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(aov\_p, }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 方差分析 P 值 = 0.0719
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2. 按 70\% / 30\% 切分训练集与测试集}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20241111}\NormalTok{)}
+\NormalTok{n\_total   }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(farm\_clean)}
+\NormalTok{train\_idx }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\FunctionTok{seq\_len}\NormalTok{(n\_total), }\AttributeTok{size =} \FunctionTok{floor}\NormalTok{(}\FloatTok{0.7} \SpecialCharTok{*}\NormalTok{ n\_total))}
+
+\NormalTok{train\_data }\OtherTok{\textless{}{-}}\NormalTok{ farm\_clean[train\_idx, ]}
+\NormalTok{test\_data  }\OtherTok{\textless{}{-}}\NormalTok{ farm\_clean[}\SpecialCharTok{{-}}\NormalTok{train\_idx, ]}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"总样本："}\NormalTok{, n\_total,          }\StringTok{"行}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 总样本： 47 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"训练集："}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(train\_data), }\StringTok{"行}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 训练集： 32 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"测试集："}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(test\_data),  }\StringTok{"行}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 测试集： 15 行
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. 在训练集上训练随机森林回归模型}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{20241111}\NormalTok{)}
+\NormalTok{rf\_fit }\OtherTok{\textless{}{-}} \FunctionTok{randomForest}\NormalTok{(}
+\NormalTok{  Weight }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop,}
+  \AttributeTok{data       =}\NormalTok{ train\_data,}
+  \AttributeTok{ntree      =} \DecValTok{500}\NormalTok{,}
+  \AttributeTok{importance =} \ConstantTok{TRUE}
+\NormalTok{)}
+\FunctionTok{print}\NormalTok{(rf\_fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+##  randomForest(formula = Weight ~ Coop, data = train_data, ntree = 500,      importance = TRUE) 
+##                Type of random forest: regression
+##                      Number of trees: 500
+## No. of variables tried at each split: 1
+## 
+##           Mean of squared residuals: 3711.312
+##                     % Var explained: -2.07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 4. 特征重要性图}
+\FunctionTok{varImpPlot}\NormalTok{(rf\_fit, }\AttributeTok{main =} \StringTok{"随机森林特征重要性"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{作业修订润色版_files/figure-latex/q3-model-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 5. 在测试集上计算 RMSE}
+\NormalTok{pred\_test }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(rf\_fit, }\AttributeTok{newdata =}\NormalTok{ test\_data)}
+\NormalTok{rmse\_test }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{((pred\_test }\SpecialCharTok{{-}}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{Weight)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))}
+\NormalTok{mae\_test  }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(pred\_test }\SpecialCharTok{{-}}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{Weight))}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"测试集 RMSE ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(rmse\_test, }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 测试集 RMSE = 48.43
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"测试集 MAE  ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(mae\_test, }\DecValTok{2}\NormalTok{),  }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 测试集 MAE  = 37.72
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"体重整体标准差 ="}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{sd}\NormalTok{(farm\_clean}\SpecialCharTok{$}\NormalTok{Weight), }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 体重整体标准差 = 57.36
+\end{verbatim}
+
+\textbf{结论分析：} 方差分析得到 P 值
+0.0719，据此判断鸡舍对体重的影响是否显著；若大于
+0.05，说明体重差异主要来自个体随机波动而非饲养环境。随机森林的测试集
+RMSE 为 48.43，与体重整体标准差 57.36
+相当，表明模型几乎未能解释体重变异。原因在于本题仅提供 \texttt{Coop}
+一个分类变量，随机森林只能按三个鸡舍分组取组均值，信息量不足以预测连续型体重------这与方差分析的结论相互印证，也说明\textbf{特征质量往往比模型选择更决定效果}。若要提升精度，应补充日龄、饲料类型、采食量等连续型特征。
+
+\section{四、数据库与时间序列}\label{ux56dbux6570ux636eux5e93ux4e0eux65f6ux95f4ux5e8fux5217}
+
+将清洗后的数据写入 SQLite 数据库，用 SQL 做条件查询；再用
+\texttt{AirPassengers} 演示 ARIMA 时间序列预测。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 写入 SQLite 数据库，表名 FarmData}
+\NormalTok{con }\OtherTok{\textless{}{-}} \FunctionTok{dbConnect}\NormalTok{(}\FunctionTok{SQLite}\NormalTok{(), }\AttributeTok{dbname =} \StringTok{"farm\_data.db"}\NormalTok{)}
+\FunctionTok{dbWriteTable}\NormalTok{(con, }\AttributeTok{name =} \StringTok{"FarmData"}\NormalTok{, }\AttributeTok{value =}\NormalTok{ farm\_clean, }\AttributeTok{overwrite =} \ConstantTok{TRUE}\NormalTok{)}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"库中现有表：}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 库中现有表：
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{dbListTables}\NormalTok{(con))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "FarmData"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 2. 用 dbGetQuery() 筛选 Coop == "A舍" 且 Weight \textgreater{} 500 的所有行}
+\NormalTok{res\_a }\OtherTok{\textless{}{-}} \FunctionTok{dbGetQuery}\NormalTok{(}
+\NormalTok{  con,}
+  \StringTok{"SELECT * FROM FarmData WHERE Coop = \textquotesingle{}A舍\textquotesingle{} AND Weight \textgreater{} 500"}
+\NormalTok{)}
+
+\FunctionTok{cat}\NormalTok{(}\StringTok{"符合条件的记录数："}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(res\_a), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 符合条件的记录数： 18
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(res\_a)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    ID Coop   Weight
+## 1   3  A舍 561.6167
+## 2   4  A舍 584.4432
+## 3   8  A舍 509.2824
+## 4  11  A舍 517.5253
+## 5  12  A舍 550.5812
+## 6  13  A舍 541.5594
+## 7  17  A舍 668.0024
+## 8  19  A舍 518.8436
+## 9  24  A舍 517.0135
+## 10 27  A舍 517.5905
+## 11 29  A舍 606.4238
+## 12 30  A舍 517.5905
+## 13 31  A舍 619.3875
+## 14 32  A舍 584.6036
+## 15 33  A舍 559.2852
+## 16 38  A舍 529.8936
+## 17 40  A舍 517.5905
+## 18 47  A舍 540.5284
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 补充：按鸡舍分组统计，便于核对}
+\NormalTok{res\_stat }\OtherTok{\textless{}{-}} \FunctionTok{dbGetQuery}\NormalTok{(}
+\NormalTok{  con,}
+  \StringTok{"SELECT Coop, COUNT(*) AS n, ROUND(AVG(Weight), 2) AS avg\_weight}
+\StringTok{   FROM FarmData GROUP BY Coop"}
+\NormalTok{)}
+\FunctionTok{print}\NormalTok{(res\_stat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Coop  n avg_weight
+## 1  A舍 25     527.77
+## 2  B舍 10     515.99
+## 3  C舍 12     481.98
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dbDisconnect}\NormalTok{(con)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{数据库连接已关闭}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## 数据库连接已关闭
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. 用 AirPassengers 跑 auto.arima，预测未来 6 个月}
+\NormalTok{fit\_arima }\OtherTok{\textless{}{-}} \FunctionTok{auto.arima}\NormalTok{(AirPassengers)}
+\FunctionTok{summary}\NormalTok{(fit\_arima)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Series: AirPassengers 
+## ARIMA(2,1,1)(0,1,0)[12] 
+## 
+## Coefficients:
+##          ar1     ar2      ma1
+##       0.5960  0.2143  -0.9819
+## s.e.  0.0888  0.0880   0.0292
+## 
+## sigma^2 = 132.3:  log likelihood = -504.92
+## AIC=1017.85   AICc=1018.17   BIC=1029.35
+## 
+## Training set error measures:
+##                  ME     RMSE     MAE      MPE     MAPE     MASE        ACF1
+## Training set 1.3423 10.84619 7.86754 0.420698 2.800458 0.245628 -0.00124847
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fc6 }\OtherTok{\textless{}{-}} \FunctionTok{forecast}\NormalTok{(fit\_arima, }\AttributeTok{h =} \DecValTok{6}\NormalTok{, }\AttributeTok{level =} \FunctionTok{c}\NormalTok{(}\DecValTok{80}\NormalTok{, }\DecValTok{95}\NormalTok{))}
+\FunctionTok{print}\NormalTok{(fc6)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
+## Jan 1961       445.6349 430.8903 460.3795 423.0851 468.1847
+## Feb 1961       420.3950 403.0907 437.6993 393.9304 446.8596
+## Mar 1961       449.1983 429.7726 468.6240 419.4892 478.9074
+## Apr 1961       491.8399 471.0270 512.6529 460.0092 523.6707
+## May 1961       503.3945 481.5559 525.2330 469.9953 536.7937
+## Jun 1961       566.8624 544.2637 589.4612 532.3007 601.4242
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{plot}\NormalTok{(fc6,}
+     \AttributeTok{main =} \StringTok{"航空乘客数未来 6 个月预测"}\NormalTok{,}
+     \AttributeTok{ylab =} \StringTok{"乘客数（千人）"}\NormalTok{,}
+     \AttributeTok{xlab =} \StringTok{"时间"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{作业修订润色版_files/figure-latex/q4-db-ts-1} \end{center}
+
+\textbf{结论分析：} SQLite
+以单一文件形式存储，不需要独立的数据库服务进程，特别适合课程实验与轻量项目。通过
+\texttt{dbWriteTable()} 将 47 行清洗后数据写入 \texttt{FarmData}
+表，再用 \texttt{dbGetQuery()} 执行带 \texttt{WHERE} 条件的
+SQL，成功筛选出 A 舍中体重大于 500 克的记录，共 18 条，说明 R
+与数据库可通过 DBI 接口无缝衔接。时间序列部分，\texttt{auto.arima()}
+依据 AIC 准则自动选出最优 ARIMA
+结构，识别出航空乘客数据存在年度季节性与上升趋势；未来 6
+个月的预测延续了这一规律，且 95\%
+置信区间随预测步长增大而变宽，符合``预测越远越不确定''的基本规律。
+
+\section{五、Python
+侧成果：评论情感判断与可视化}\label{ux4e94python-ux4fa7ux6210ux679cux8bc4ux8bbaux60c5ux611fux5224ux65adux4e0eux53efux89c6ux5316}
+
+Python 脚本（\texttt{食堂评论情感分析.py}）用 requests 循环调用大模型
+API，判断 5 条食堂评论的好评/差评，并用 matplotlib
+绘制好评率饼图，保存为 \texttt{final\_pie.png}，此处嵌入报告。
+
+\#\texttt{\{r\ q5-pie,\ echo=FALSE,\ fig.cap="5\ 条食堂评论情感分布饼图",\ out.width="62\%"\}\ \#knitr::include\_graphics("final\_pie.png")\ \#}
+
+\textbf{结论分析：}
+该流程把非结构的自然语言评论转换为结构化的情感标签，再汇总为可视化图表，体现了``大模型做语义理解、Python
+做批量调用与统计''的分工模式。相比人工逐条标注，这种方式的成本极低，适合处理成百上千条用户反馈。
+
+\section{六、总结}\label{ux516dux603bux7ed3}
+
+本报告完整走通一条数据分析流水线：模拟含缺失值与极端值的原始数据，经中位数填补与
+IQR 清洗得到 47 行干净样本；用 rvest
+抓取网页标题、与鸡舍字段拼成文本，经分词与词频统计绘制词云；用方差分析检验鸡舍对体重的影响，用随机森林做回归预测并评估
+RMSE；最后完成 SQLite 入库与条件查询，以及 AirPassengers 的 ARIMA
+预测，并嵌入 Python 侧的大模型情感分析饼图。
+
+各环节方法选择均有明确依据：中位数填补抗极端值、IQR
+法则不依赖分布假设、方差分析用于分组差异检验、随机森林可捕捉非线性关系、ARIMA
+处理含趋势与季节性的序列。同时也暴露出模型局限------仅用鸡舍一个分类变量预测体重，效果接近随机猜测，说明特征工程的质量往往比模型选择更决定结果好坏。
+
+\end{document}

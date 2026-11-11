@@ -1,0 +1,338 @@
+---
+title: "鸡舍生产性能与饲料效果统计分析报告"
+author: "秋水雁翎（胡涛）"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center"
+)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(openxlsx)
+library(corrplot)
+library(randomForest)
+```
+
+# 1. 项目背景
+
+本报告旨在评估不同鸡舍（A 舍、B 舍、C 舍）以及不同饲料（标准、高级）对鸡群体重及产蛋量的影响。数据包含 28 个有效样本。
+
+## 1.1 研究目的（拓展新增）
+
+1. 描述不同鸡舍、不同饲料组下鸡体重、产蛋量的分布特征；
+2. 检验饲料类型对产蛋量、体重是否存在统计学显著差异；
+3. 探索鸡舍与饲料之间是否存在交互作用；
+4. 使用相关性分析观察体重和产蛋量之间的关联；
+5. 利用随机森林模型识别影响产蛋量的重要变量；
+6. 通过交叉验证评估模型稳定性，计算 RMSE，量化预测误差。
+
+## 1.2 变量说明（拓展新增）
+
+| 变量名 | 含义 | 类型 |
+|---|---|---|
+| Coop | 鸡舍编号（A 舍 / B 舍 / C 舍） | 分类变量 |
+| Feed | 饲料类型（标准 / 高级） | 分类变量 |
+| Weight | 鸡体重（单位：g） | 连续数值变量 |
+| Egg_Count | 产蛋数量 | 连续数值变量 |
+| Weight_Level | 体重等级（偏瘦 / 正常 / 肥胖，派生变量） | 分类变量 |
+
+# 2. 数据准备与清洗
+
+```{r}
+# 1. 读取数据（确保你的数据文件在工作目录下）
+# farm_data <- read.csv("你的数据文件名.csv")
+# 注意：如果你的数据已经在环境里了，这步可以跳过。
+
+# 生成模拟农场数据
+set.seed(123)
+farm_data <- data.frame(
+  ID = 1:30,
+  Coop = sample(c("A舍", "B舍", "C舍"), 30, replace = TRUE),   # 鸡舍
+  Feed = sample(c("标准", "高级"), 30, replace = TRUE),        # 饲料类型
+  Day = rep(1:10, 3),                                          # 喂养天数
+  Weight = round(rnorm(30, mean = 500, sd = 50)),              # 体重
+  Egg_Count = round(rnorm(30, mean = 20, sd = 5)),             # 产蛋量
+  Mortality = sample(c(0, 1), 30, replace = TRUE, prob = c(0.9, 0.1))  # 是否死亡(1死0活)
+)
+
+# 故意制造两个缺失值（NA），考察清洗能力
+farm_data$Weight[c(4, 15)] <- NA
+
+# 删除含缺失值的整行
+clean_data <- drop_na(farm_data)
+
+# 2. 数据清洗：去重
+clean_data <- clean_data %>% distinct()
+
+# 3. 特征工程：根据体重新增“偏瘦/正常/肥胖”分类
+clean_data <- clean_data %>%
+  mutate(Weight_Level = case_when(
+    Weight < 450 ~ "偏瘦",
+    Weight >= 450 & Weight <= 500 ~ "正常",
+    Weight > 500 ~ "肥胖"
+  ))
+
+# 4. 把分组列转成因子，保证建模与绘图时分组稳定
+clean_data <- clean_data %>%
+  mutate(Coop = as.factor(Coop), Feed = as.factor(Feed))
+
+head(clean_data)
+nrow(clean_data)   # 30 行原始数据去掉 2 个缺失 = 28 个有效样本
+```
+
+> 清洗逻辑说明：原始 30 条记录中人为制造了 2 个体重缺失值，`drop_na()` 会删掉整行，最终得到 28 个有效样本，与报告标称的样本量一致。
+
+## 2.1 数据缺失检查（拓展新增）
+
+```{r}
+# 统计每一列缺失值数量
+colSums(is.na(farm_data))    # 清洗前：Weight 列有 2 个 NA
+colSums(is.na(clean_data))   # 清洗后：应全部为 0
+```
+
+说明：本步骤用于检查数据是否存在缺失，是数据分析前置标准流程。如果存在 NA，后续 t 检验、建模都会报错。
+
+## 2.2 Z-score 标准化（拓展新增，此前练习的任务 2）
+
+```{r}
+# 新建标准化列 Weight_Z、Egg_Count_Z
+clean_data <- clean_data %>%
+  mutate(
+    Weight_Z = as.vector(scale(Weight)),
+    Egg_Count_Z = as.vector(scale(Egg_Count))
+  )
+
+# 检验标准化后均值是否接近 0
+mean(clean_data$Weight_Z)
+mean(clean_data$Egg_Count_Z)
+```
+
+说明：`scale()` 实现 Z-score 标准化，标准化后均值 ≈ 0、标准差 ≈ 1；标准化后的变量可以放在同一尺度上对比，适合后续机器学习建模。
+
+# 3. 描述性统计
+
+```{r}
+# 汇总不同鸡舍的体重数据
+summary_table <- clean_data %>%
+  group_by(Coop) %>%
+  summarise(
+    平均体重 = mean(Weight),
+    标准差 = sd(Weight),
+    最大体重 = max(Weight),
+    最小体重 = min(Weight),
+    样本量 = n()
+  )
+
+# 打印表格
+summary_table
+
+# 将统计表导出为 Excel 保存
+write.xlsx(summary_table, "各组体重描述统计表.xlsx")
+```
+
+## 3.1 按【鸡舍 + 饲料】双分组汇总（拓展新增）
+
+```{r}
+summary_feed_coop <- clean_data %>%
+  group_by(Coop, Feed) %>%
+  summarise(
+    平均体重 = mean(Weight),
+    平均产蛋量 = mean(Egg_Count),
+    标准差体重 = sd(Weight),
+    样本量 = n(),
+    .groups = "drop"
+  )
+
+summary_feed_coop
+write.xlsx(summary_feed_coop, "鸡舍饲料分组汇总表.xlsx")
+```
+
+## 3.2 体重等级分布统计（拓展新增，case_when 产出的分类统计）
+
+```{r}
+level_count <- clean_data %>%
+  count(Weight_Level, Feed)
+
+level_count
+```
+
+# 4. 数据可视化（分面箱线图）
+
+```{r}
+# 绘制按鸡舍分面的箱线图
+ggplot(clean_data, aes(x = Feed, y = Weight, fill = Feed)) +
+  geom_boxplot() +
+  facet_wrap(~ Coop) +
+  theme_minimal() +
+  labs(
+    title = "各鸡舍不同饲料下的体重分布",
+    x = "饲料类型",
+    y = "体重 (g)"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## 4.1 产蛋量分面箱线图（拓展新增，同绘图逻辑）
+
+```{r}
+ggplot(clean_data, aes(x = Feed, y = Egg_Count, fill = Feed)) +
+  geom_boxplot() +
+  facet_wrap(~ Coop) +
+  theme_minimal() +
+  labs(
+    title = "各鸡舍不同饲料下的产蛋量分布",
+    x = "饲料类型",
+    y = "产蛋数量"
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## 4.2 相关性热力图（拓展新增，corrplot）
+
+```{r}
+# 提取数值变量做相关矩阵
+num_dat <- clean_data %>% select(Weight, Egg_Count)
+corr_mat <- cor(num_dat)
+corrplot(corr_mat, method = "color", addCoef.col = "black", title = "变量相关性热力图")
+```
+
+## 4.3 交互作用图（拓展新增，双因素交互）
+
+```{r}
+interact_summary <- clean_data %>%
+  group_by(Coop, Feed) %>%
+  summarise(mean_w = mean(Weight), .groups = "drop")
+
+ggplot(interact_summary, aes(x = Coop, y = mean_w, color = Feed, group = Feed)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
+  labs(title = "鸡舍与饲料对体重的交互作用图", x = "鸡舍", y = "平均体重(g)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+# 5. 统计检验与结论
+
+```{r}
+# 检验“标准”和“高级”饲料对产蛋量的影响是否存在显著差异
+t_result <- t.test(Egg_Count ~ Feed, data = clean_data)
+print(t_result)
+```
+
+**结论分析：**
+
+通过独立样本 T 检验，我们得出 P 值为 `r round(t_result$p.value, 4)`。
+
+（*注：如果 P 值大于 0.05，说明高级饲料和标准饲料在对产蛋量的影响上并没有统计学上的显著差异。*）
+
+## 5.1 双因素方差分析（拓展新增，aov 交互模型）
+
+```{r}
+# 检验鸡舍、饲料以及两者交互对体重的影响
+aov_mod <- aov(Weight ~ Coop * Feed, data = clean_data)
+summary(aov_mod)
+```
+
+解读思路：
+
+- `Coop`：鸡舍主效应
+- `Feed`：饲料主效应
+- `Coop:Feed`：鸡舍 × 饲料交互效应
+- P < 0.05 代表该效应显著
+
+# 6. 机器学习：随机森林回归（拓展新增，randomForest 包）
+
+研究目标：用鸡舍、饲料、体重，预测产蛋量 `Egg_Count`。
+
+```{r}
+# 1. 划分训练集、测试集
+set.seed(123)   # 固定随机种子，保证结果可复现
+n <- nrow(clean_data)
+train_idx <- sample(1:n, size = 0.7 * n, replace = FALSE)
+train_data <- clean_data[train_idx, ]
+test_data  <- clean_data[-train_idx, ]
+
+# 2. 随机森林模型
+rf_mod <- randomForest(Egg_Count ~ Coop + Feed + Weight, data = train_data, ntree = 500)
+rf_mod
+
+# 3. 特征重要性图
+varImpPlot(rf_mod, main = "特征重要性")
+
+# 4. 测试集预测 + 计算 RMSE
+# 先对齐因子水平，避免测试集出现训练集没见过的分组导致报错
+test_data$Coop <- factor(test_data$Coop, levels = levels(train_data$Coop))
+test_data$Feed <- factor(test_data$Feed, levels = levels(train_data$Feed))
+
+pred_rf <- predict(rf_mod, newdata = test_data)
+rmse_rf <- sqrt(mean((pred_rf - test_data$Egg_Count)^2, na.rm = TRUE))
+cat("随机森林测试集RMSE = ", rmse_rf, "\n")
+```
+
+## 6.1 5 折循环交叉验证（拓展新增，for 循环交叉验证）
+
+```{r}
+set.seed(123)
+k <- 5
+rmse_vec <- c()
+
+for (i in 1:k) {
+  idx <- sample(1:n, size = 0.7 * n, replace = FALSE)
+  train_k <- clean_data[idx, ]
+  test_k  <- clean_data[-idx, ]
+
+  # 对齐因子水平，防止某一折缺少某个分组导致预测报错
+  test_k$Coop <- factor(test_k$Coop, levels = levels(train_k$Coop))
+  test_k$Feed <- factor(test_k$Feed, levels = levels(train_k$Feed))
+
+  rf_k <- randomForest(Egg_Count ~ Coop + Feed + Weight, data = train_k, ntree = 300)
+  pred_k <- predict(rf_k, newdata = test_k)
+  rmse_vec[i] <- sqrt(mean((pred_k - test_k$Egg_Count)^2, na.rm = TRUE))
+}
+
+rmse_vec
+mean_cv_rmse <- mean(rmse_vec, na.rm = TRUE)
+cat("5折交叉验证平均RMSE：", mean_cv_rmse, "\n")
+```
+
+## 6.2 真实值 vs 预测值散点图（拓展新增，45° 基准线）
+
+```{r}
+df_pred <- data.frame(
+  real = test_data$Egg_Count,
+  pred = pred_rf
+)
+
+ggplot(df_pred, aes(x = real, y = pred)) +
+  geom_point(size = 3) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linewidth = 1) +
+  coord_fixed(ratio = 1) +
+  labs(title = "真实产蛋量 vs 随机森林预测值", x = "真实值", y = "预测值") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+> 读图方法：点越贴近红色 45° 线，说明预测越准；点分散得越开，说明模型误差越大。
+
+# 7. 综合讨论与风险说明（拓展新增）
+
+1. 本研究使用独立 t 检验、双因素方差分析比较不同饲料、鸡舍的生产指标；
+2. 相关性热力图用来观察体重和产蛋量之间的线性关联；
+3. 随机森林用来挖掘非线性关系，`varImpPlot` 识别关键影响因子；
+4. 采用训练 / 测试划分 + for 循环交叉验证，用 RMSE 衡量模型预测误差；
+5. 注意：随机森林偶尔出现负的 `% IncMSE` 属于样本量偏小（28 条）的正常现象，不是代码错误，仅作课堂学习演示，不代表模型失效。
+
+# 8. 作业小结（拓展新增）
+
+本次报告完整使用了：数据去重 `distinct`、`case_when` 分类、`group_by` 汇总、`scale` 标准化、ggplot 分面箱线图、交互作用图、相关性热力图、t 检验、aov 方差分析、randomForest 随机森林、训练测试集划分、for 循环交叉验证、RMSE 评估、结果导出 Excel。所有技能均为本阶段课程学习内容。

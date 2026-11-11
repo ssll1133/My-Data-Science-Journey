@@ -1,0 +1,398 @@
+---
+title: "猪生长数据与逻辑回归分析报告"
+author: "秋水雁翎（胡涛）"
+date: "2026-11-04"
+output:
+  word_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# 一、实训概述
+
+本次 R 语言的数据分析实训学习并掌握了从原始数据读取、清洗、整理、统计建模、可视化、模型评估的全套数据分析流程。
+
+结合动物科学专业对于猪生长数据与经典的 mtcars 机器学习数据集，完成了：
+
+1. 基础数据结构与代码语法的掌握
+2. csv 数据导入及其导出
+3. dplyr 中的基础函数，比如 filter、mutate、arrange、group_by、select、left_join 以及管道符的使用
+4. tidyr 宽窄数据的转换
+5. 科研级统计分析：t 检验、线性回归、逻辑回归
+6. ggplot2 画柱状图与线性回归图
+7. 机器学习模型评估：混淆矩阵、准确值、精确值、召回值
+
+本次实训覆盖零基础入门实战核心技能，建构了标准化数据分析工作流。
+
+# 二、R 语言基础与数据结构（模块一）
+
+## 2.1 变量与赋值规范
+
+R 语言的标准赋值符号为 `<-`，是数据分析的规范写法，可以稳定定义变量。
+
+```{r}
+a <- 10
+weight <- 62.5
+```
+
+## 2.2 向量与基础统计
+
+向量是 R 的最小单元，其包括**数字型、字符串型、逻辑型**，使用 `c()` 构建。
+
+**数字型**
+
+```{r}
+x <- c(1:10)
+pig_weight <- c(65, 72, 68, 80, 75)
+```
+
+**字符串型**
+
+字符串型的必须用 `""` 或 `''` 括起来，其不可进行大部分数据统计；字符串的向量可以用 `strsplit(向量, "分隔符")` 来分解为一个个小因子。
+
+```{r}
+ID <- c('A', 'B', 'C', 'D', 'E')
+# 语法：strsplit(向量, "分隔符")
+strsplit("A-B-C", "-")
+```
+
+**逻辑型**
+
+其必须所有字母均大写。
+
+```{r}
+y <- c(TRUE, FALSE)
+```
+
+> 注意：逻辑型只能写 `TRUE` / `FALSE`（全部大写），加上引号就变成字符串了。
+
+**基础统计函数**
+
+- 平均值 `mean()`
+- 标准差 `sd()`
+- 最大值 `max()`
+- 最小值 `min()`
+- 同时输出最大最小 `range()`
+- 中位数 `median()`
+- 方差 `var()`
+- 四分位数 `quantile(x, 3/4)` 或 `quantile(x, 1/4)`
+- 标准误 `sd() / sqrt(n)`
+- 变异系数 `(sd() / mean()) * 100`
+
+## 2.3 矩阵与数组构建
+
+用函数 `matrix(x, nrow = x, ncol = y)` 来构建。
+
+```{r}
+x <- matrix(1:20, 4, 5)   # 四行五列的矩阵
+# 可用 rownames()、colnames() 给矩阵的行和列命名
+```
+
+可以用 `dim()` 函数对数组进行构建。
+
+```{r}
+dim(x) <- c(2, 2, 5)      # 把 20 个元素变成 2×2 的矩阵 5 个
+```
+
+而 `array` 可以直接一步到位构建数字。
+
+```{r}
+x <- array(1:24, c(2, 3, 4))   # 把 1:24 的向量变成 2×3 的矩阵 4 个
+```
+
+## 2.4 构建数据框
+
+数据框是数据分析核心表格结构。
+
+```{r}
+data <- data.frame(
+  ID = c(1, 2, 3, 4),
+  Weight = c(55, 60, 65, 70)
+)
+
+data
+```
+
+> 注意：对于数据框内的数据一定要用 `=` 而不是用 `<-`，否则你的列名就会是那一个数据整体。
+
+对于以上常见结构，若想对其中结构进行变化，可以使用 `[]`。例如要改变其中的数据可以用：
+
+```{r eval=FALSE}
+x[5] <- 27              # 将 x 的第五个数据改为 27
+x$y[5] <- 2             # 将数据框 x 中名为 y 的列的第二项值改为 2
+colnames(x)[2] <- 'name'  # 将数据框 x 的第二个列名改为 name
+```
+
+> 以上三行为改值语法示范，需先有对应的 `x` 对象才能运行。
+
+# 三、数据读取与导出（模块二）
+
+数据分析的第一步为数据载入与保存，本模块全程使用 CSV 格式。
+
+## 3.1 改变 R 中的文件路径
+
+可用 `setwd(文件路径)` 函数建立新的文件路径，但是其只可以用于本次的使用。
+
+```{r eval=FALSE}
+setwd("D:/Rwork")
+```
+
+## 3.2 读取本地数据
+
+```{r eval=FALSE}
+final_clean_data <- read.csv('final_clean_data.csv')
+```
+
+## 3.3 数据导出
+
+加入 `row.names = FALSE` 避免多于索引列，是科研的标准写法。
+
+```{r eval=FALSE}
+write.csv(final_clean_data, 'final_clean_data.csv', row.names = FALSE)
+```
+
+# 四、数据清洗与高级数据处理（模块三 dplyr）
+
+dplyr 为 R 中最强的清洗包，所有操作皆可使用 `%>%` 管道符进行流水线操作。
+
+## 4.1 筛选行 filter()
+
+根据条件精准筛选实验数据。
+
+```{r eval=FALSE}
+data %>% filter(Weight > 50, Feed %in% c('A', 'B'))
+```
+
+> 上面这行：先选取数据 data 中 Feed 为 A、B 的行，再从中选出 Weight > 50 的值。
+
+## 4.2 新增变量 mutate()
+
+可实现数据计算、分类标签、二分类变量构建，用于逻辑回归建模。
+
+```{r eval=FALSE}
+data %>% mutate(is_heavy = ifelse(Weight > 60, 1, 0))
+```
+
+> 添加一列 is_heavy，并做一个逻辑关系：Weight > 60 即为 1，不是则为 0。
+> 注意 `1` 和 `0` 不要加引号，加引号就变成字符串，逻辑回归会报错。
+
+## 4.3 排列 arrange()
+
+```{r eval=FALSE}
+data %>% arrange(desc(Weight))
+```
+
+> `desc()` 这个就是按照倒序排列。
+
+## 4.4 分组统计
+
+动物科学最常用功能，用于不同饲料组均值统计。
+
+```{r eval=FALSE}
+data %>%
+  group_by(Feed) %>%
+  summarise(
+    mean_weight = mean(Weight),
+    sd_weight = sd(Weight),
+    count = n()
+  )
+```
+
+## 4.5 多表连接 left_join()
+
+适合同时验多组数据表合并匹配。
+
+```{r eval=FALSE}
+total_data <- left_join(表1, 表2, by = 'ID')
+```
+
+# 五、数据长宽变形规整（模块四 tidyr）
+
+实验原始数据常为长数据 Day1、Day2、Day3，无法直接绘制建模图，必须转为长数据。
+
+## 5.1 宽数据 pivot_longer()
+
+```{r eval=FALSE}
+long_data <- wide_data %>%
+  pivot_longer(cols = Day1:Day7, names_to = 'Day', values_to = 'Weight')
+```
+
+## 5.2 长转宽 pivot_wider()
+
+反向还原展示数据表格结构，用于报告输出。
+
+```{r eval=FALSE}
+# wide_data <- long_data %>% pivot_wider(names_from = 'Day', values_from = 'Weight')
+```
+
+# 六、统计分析与建模实战（模块五 核心作业成果）
+
+## 6.1 独立样本 T 检验（两组饲料差异分析）
+
+**研究目的**：比较 A、B 两种饲料喂养下猪体重是否存在统计学差异。
+
+```{r eval=FALSE}
+t_model <- t.test(Weight ~ Feed, data = final_clean_data)
+t_model
+```
+
+> 语法记忆：`t.test(y ~ x)`，即因变量写在波浪号左边，分组变量写在右边。
+
+**实验结果解读**：本次实训结果 P = 0.87，P > 0.05，故两组体重无显著统计学差异。
+
+**结论**：饲料 A 与饲料 B 对猪增重效果无明显区别。
+
+## 6.2 线性回归分析（生长趋势预测）
+
+建立体重随饲料天数变化的预测模型。
+
+```{r eval=FALSE}
+lm_model <- lm(Weight ~ Day, data = long_data)
+summary(lm_model)
+```
+
+> 通过拟合优度 R² 判断模型解释能力，用于分析生长规律。
+
+## 6.3 带预测区间的回归绘图
+
+采用新人稳定写法（pred_df 合并法），规避 ggplot aes 继承报错。
+
+```{r eval=FALSE}
+new_day <- data.frame(Day = seq(min(long_data$Day), max(long_data$Day), by = 0.1))
+
+pred_res <- predict(lm_model, newdata = new_day, interval = "prediction")
+
+pred_df <- cbind(new_day, pred_res)
+
+ggplot(long_data, aes(x = Day, y = Weight)) +
+  geom_point(size = 2, color = "black") +
+  geom_line(data = pred_df, aes(y = fit), color = 'red', linewidth = 1) +
+  geom_ribbon(data = pred_df, aes(ymin = lwr, ymax = upr),
+              inherit.aes = FALSE, alpha = 0.2, fill = 'grey') +
+  labs(title = '猪生长体重线性回归预测图', x = '饲养天数', y = '体重') +
+  theme_bw()
+```
+
+> 关键点：`geom_ribbon` 里那行 `inherit.aes = FALSE` 千万别漏，否则会报“找不到对象”。
+
+## 6.4 逻辑回归建模（二分类机器学习）
+
+使用 mtcars 数据集，根据车重（wt）、马力（hp）预测车辆是否为手动挡。
+
+```{r}
+model_logit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
+summary(model_logit)
+```
+
+```{r}
+# 输出真实概率
+pred_prob <- predict(model_logit, type = 'response')
+
+# 概率转分类
+pred_class <- ifelse(pred_prob > 0.5, 1, 0)
+
+# 混淆矩阵
+conf <- table(pred_class, mtcars$am)
+conf
+
+# 准确率
+acc <- mean(pred_class == mtcars$am)
+acc
+```
+
+**模型输出结果**
+
+- 总样本 32 辆
+- 真实自动挡 19 辆
+- 真实手动挡 13 辆
+- 预测错误样本 2 个
+- 模型整体准确率 93.75%
+
+## 6.5 高级模型指标计算（精确率、召回率）
+
+```{r}
+TP <- conf[2, 2]
+TN <- conf[1, 1]
+FP <- conf[2, 1]
+FN <- conf[1, 2]
+
+precision <- TP / (TP + FP)
+recall <- TP / (TP + FN)
+
+cat('精确值 Precision:', precision, '\n')
+cat('召回值 Recall:', recall, '\n')
+```
+
+**指标解读**
+
+- 准确率 93.75%，整体预测非常优秀
+- 精确值、召回值均接近 92%：模型稳定性高，误判极少
+
+# 七、ggplot2 科研可视化全套技能（模块六）
+
+本次实训掌握科研论文常用图表。
+
+## 7.1 箱线图（组间差异展示）
+
+```{r eval=FALSE}
+ggplot(final_clean_data, aes(x = Feed, y = Weight, fill = Feed)) +
+  geom_boxplot() +
+  labs(title = '不同饲料组猪体重分布箱线图', x = '饲料组', y = '体重') +
+  theme_minimal()
+```
+
+## 7.2 柱形图
+
+```{r eval=FALSE}
+ggplot(data = my_pigs, aes(x = Feed, y = Weight, fill = Feed, color = Feed)) +
+  geom_bar(stat = 'identity', position = 'dodge', color = 'red', fill = 'green') +
+  geom_text(aes(label = Weight), vjust = -0.5, size = 4) +
+  labs(title = '生长数据', x = '饲料组', y = '体重') +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_fill_manual(values = c('A' = 'purple', 'B' = 'grey', 'C' = 'orange')) +   # 给柱内填色
+  scale_color_manual(values = c('A' = 'blue', 'B' = 'grey', 'C' = 'orange'))      # 给柱框填色
+```
+
+> 提醒：`geom_text(aes(label = Weight))` 会给**每一行数据**都打上体重数字，柱子一多就糊成一片。如果只是要干净的柱形图，把这一行删掉。
+
+## 7.3 通用绘图规范
+
+- `theme_bw()` 学术黑白主题
+- `labs()` 规范标题坐标轴
+- `geom_smooth()` 趋势拟合
+- `ggsave()` 高清 300dpi 出图
+
+# 八、实训内容总结
+
+本次一个星期的 R 语言技能实训，我从零基础掌握了完整数据分析工业流水线：
+
+1. 掌握 R 基础语法、向量、矩阵、数据框核心结构
+2. 熟悉 CSV 数据读写，规范保存数据
+3. 精通 dplyr 筛选、分组、统计、条件分类
+4. 掌握 tidyr 宽窄数据重塑，适配模型绘图标准格式
+5. 掌握动物统计核心：T 检验差异分析、线性回归生长预测
+6. 掌握机器学习入门：逻辑回归二分类建模、混淆矩阵、三大评价指标
+7. 掌握 ggplot2 全套科研绘图，可产出论文级图表
+8. 建立个人标准化数据分析作品集，可用于课程作业、实训报告、技能展示
+
+本次作业成果稳定、代码规范，有报错但懂得自行动手搜索知识改正，流程完整，完全达到数据分析入门精通水平。
+
+# 九、个人作品集归档完成情况
+
+已在移动硬盘建立专属专项项目文件夹：`Code_/Pig_Data_Analysis`
+
+**归档内容**
+
+- 全部 R 脚本代码
+- 清洗完成 `final_clean_data.csv`
+- 回归散点图、箱线图可视化结果
+- 本次实训 Rmd 报告与 HTML 成品

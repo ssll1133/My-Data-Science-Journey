@@ -1,0 +1,546 @@
+---
+title: "跨语言视角下的农场数据清洗与机器学习预测报告"
+author: "秋水雁翎（胡涛）"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  warning   = FALSE,
+  message   = FALSE,
+  fig.align = "center",
+  out.width = "85%",
+  dpi       = 150
+)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(randomForest)
+library(knitr)
+```
+
+# 模块一：数据预处理与 IQR 异常值清洗（R 语言）
+
+## 1.1 数据来源与变量说明
+
+本报告使用一套模拟的鸡舍生产性能数据。字段说明如下：
+
+| 变量名 | 含义 | 类型 |
+|---|---|---|
+| ID | 个体编号 | 标识 |
+| Coop | 鸡舍编号（A 舍 / B 舍 / C 舍） | 分类变量 |
+| Feed | 饲料类型（标准 / 高级） | 分类变量 |
+| Day | 观测日龄（天） | 连续数值变量 |
+| Weight | 体重（g） | 连续数值变量 |
+| Egg_Count | 产蛋数量 | 连续数值变量 |
+| Mortality | 是否死亡（1 死 / 0 活） | 二分类变量 |
+
+> 说明：真实实验中数据应来自实测记录。本报告使用 `set.seed()` 生成的可复现模拟数据，使整份报告**不依赖任何外部文件也能一键编译**。
+
+## 1.2 原始数据生成
+
+```{r}
+set.seed(123)
+
+farm_data <- data.frame(
+  ID        = 1:30,
+  Coop      = sample(c("A舍", "B舍", "C舍"), 30, replace = TRUE),
+  Feed      = sample(c("标准", "高级"), 30, replace = TRUE),
+  Day       = rep(1:10, 3),
+  Weight    = round(rnorm(30, mean = 500, sd = 50)),
+  Egg_Count = round(rnorm(30, mean = 20, sd = 5)),
+  Mortality = sample(c(0, 1), 30, replace = TRUE, prob = c(0.9, 0.1))
+)
+
+# 注入 2 个缺失值，用于演示缺失值处理
+farm_data$Weight[c(4, 15)] <- NA
+
+# 注入 2 个极端值（远高于 / 远低于正常区间），用于演示 IQR 剔除
+farm_data$Weight[c(1, 28)] <- c(850, 190)
+
+cat("原始数据行数：", nrow(farm_data), "\n")
+```
+
+## 1.3 缺失值处理
+
+```{r}
+# 查看缺失分布：确认哪些列存在 NA
+colSums(is.na(farm_data))
+```
+
+```{r}
+clean_data <- farm_data %>%
+  na.omit() %>%      # 剔除含缺失值的整行（等价于 tidyr::drop_na）
+  distinct() %>%     # 去重，保证没有重复记录
+  mutate(
+    Coop = as.factor(Coop),
+    Feed = as.factor(Feed)
+  )
+
+cat("缺失值处理后行数：", nrow(clean_data), "\n")
+```
+
+## 1.4 IQR 法则的原理
+
+IQR（Inter-Quartile Range，四分位距）是箱线图判定异常值的通用标准：
+
+$$
+IQR = Q_3 - Q_1
+$$
+
+正常区间定义为：
+
+$$
+\left[\,Q_1 - 1.5 \times IQR,\quad Q_3 + 1.5 \times IQR\,\right]
+$$
+
+落在区间之外的观测值判为极端异常值，予以剔除。
+
+**为什么用 IQR 而不是"均值 ± 3 标准差"？**
+因为均值与标准差本身受极端值影响极大——极端值会把均值拉走、把标准差撑大，反过来"保护"了自己。
+而 Q1、Q3 是分位数，对极端值不敏感，判定更稳健。
+
+## 1.5 IQR 清洗代码（已修正三处常见错误）
+
+```{r}
+# ---- 修正说明：原代码有三个致命问题 ----
+# 问题1：未加载 dplyr 就直接用 %>% 和 filter()，报"没有 filter 这个函数"
+# 问题2：管道内部又写 clean_data$Weight，属于重复指定数据源，且容易取错行
+# 问题3：quantile() 未加 na.rm = TRUE，遇到 NA 会返回 NA，导致边界全部失效
+
+Q1 <- quantile(clean_data$Weight, 0.25, na.rm = TRUE)
+Q3 <- quantile(clean_data$Weight, 0.75, na.rm = TRUE)
+
+# 注意：变量名用 iqr_val，不要命名为 IQR
+# 因为 IQR 是 R 自带函数名，覆盖之后会让后续 IQR() 调用失效
+iqr_val <- Q3 - Q1
+
+lower_bound <- Q1 - 1.5 * iqr_val
+upper_bound <- Q3 + 1.5 * iqr_val
+
+cat("Q1 =", Q1, "　Q3 =", Q3, "　IQR =", iqr_val, "\n")
+cat("正常区间：", lower_bound, "～", upper_bound, "\n")
+```
+
+```{r}
+n_before <- nrow(clean_data)
+
+# 管道内部直接写列名，不要再加 clean_data$
+perfect_data <- clean_data %>%
+  filter(Weight >= lower_bound, Weight <= upper_bound)
+
+n_after <- nrow(perfect_data)
+
+cat("IQR 清洗前：", n_before, "行\n")
+cat("IQR 清洗后：", n_after, "行\n")
+cat("剔除异常样本：", n_before - n_after, "个\n")
+```
+
+## 1.6 清洗前后的行数对比与剔除明细
+
+**清洗前后对比**
+
+| 阶段 | 行数 | 说明 |
+|---|---|---|
+| 原始数据 | 30 | 含 2 个缺失值 + 2 个极端值 |
+| 缺失值处理后 | `r n_before` | `na.omit()` 剔除 2 行 |
+| IQR 清洗后 | `r n_after` | 再剔除 `r n_before - n_after` 个极端值 |
+
+```{r}
+# 把被剔除的样本单独列出，便于核查剔除是否合理
+outliers <- clean_data %>%
+  filter(Weight < lower_bound | Weight > upper_bound) %>%
+  select(ID, Coop, Feed, Weight)
+
+kable(
+  outliers,
+  caption = "表1 被 IQR 法则剔除的异常样本明细",
+  align   = "c"
+)
+```
+
+## 1.7 小结
+
+本次清洗采用 IQR 法则剔除极端异常值，把样本从 `r n_before` 行压缩到 `r n_after` 行，剔除了 `r n_before - n_after` 个极端样本，保证了数据的稳定性。
+
+> **为什么这一步必须做在前面**：极端值会显著拉高或拉低均值与标准差，导致后续方差分析的平方和分配失衡、回归模型的参数被少数几个点"绑架"。
+> **先洗数据，再谈建模**，是数据分析最基本的顺序。
+
+# 模块二：描述性统计与双因素方差分析
+
+## 2.1 按鸡舍分组统计平均体重
+
+```{r}
+summary_coop <- perfect_data %>%
+  group_by(Coop) %>%
+  summarise(
+    平均体重 = round(mean(Weight), 1),
+    标准差   = round(sd(Weight), 1),
+    最小体重 = min(Weight),
+    最大体重 = max(Weight),
+    样本量   = n(),
+    .groups  = "drop"
+  )
+
+kable(
+  summary_coop,
+  caption = "表2 各鸡舍体重描述性统计",
+  align   = "c"
+)
+```
+
+> `.groups = "drop"` 的作用：`summarise()` 之后自动解除分组，避免结果仍带着分组属性影响后续操作。
+
+## 2.2 按【鸡舍 + 饲料】双分组统计
+
+```{r}
+summary_cross <- perfect_data %>%
+  group_by(Coop, Feed) %>%
+  summarise(
+    平均体重   = round(mean(Weight), 1),
+    平均产蛋量 = round(mean(Egg_Count), 1),
+    样本量     = n(),
+    .groups    = "drop"
+  )
+
+kable(
+  summary_cross,
+  caption = "表3 鸡舍 × 饲料双分组统计",
+  align   = "c"
+)
+```
+
+## 2.3 双因素方差分析
+
+模型设定为 `Weight ~ Feed * Coop`。其中 `*` 表示**同时纳入两个主效应及其交互项**，
+等价于 `Feed + Coop + Feed:Coop`。
+
+```{r}
+aov_mod <- aov(Weight ~ Feed * Coop, data = perfect_data)
+summary(aov_mod)
+```
+
+> 三个 P 值分别对应：
+> `Feed` 行 = 饲料主效应；
+> `Coop` 行 = 鸡舍主效应；
+> `Feed:Coop` 行 = 二者的交互作用。
+
+## 2.4 P 值自动提取与结果解读
+
+```{r}
+# 从方差分析表中把各项 P 值提取成独立变量，便于在正文中直接引用
+aov_tab <- summary(aov_mod)[[1]]
+
+feed_p  <- aov_tab["Feed",      "Pr(>F)"]
+coop_p  <- aov_tab["Coop",      "Pr(>F)"]
+inter_p <- aov_tab["Feed:Coop", "Pr(>F)"]
+
+cat("饲料主效应 P  =", round(feed_p, 4), "\n")
+cat("鸡舍主效应 P  =", round(coop_p, 4), "\n")
+cat("交互作用  P   =", round(inter_p, 4), "\n")
+```
+
+经过分析，**饲料和鸡舍的交互作用 P 值为 `r round(inter_p, 4)`**。
+
+- 若 P > 0.05：说明饲料的效果在不同鸡舍之间**没有显著差异**，可以单独评价饲料主效应，无需分鸡舍讨论；
+- 若 P < 0.05：说明饲料的效果**依赖于鸡舍条件**，同一个饲料在不同鸡舍表现不同，必须分鸡舍比较，不能笼统下结论。
+
+其中：
+
+- 饲料主效应 P = `r round(feed_p, 4)`，判断不同饲料对体重是否存在显著影响；
+- 鸡舍主效应 P = `r round(coop_p, 4)`，判断不同鸡舍的环境条件本身是否造成体重差异。
+
+> **易错点提醒**：`Weight ~ Feed + Coop` 只检验两个主效应；
+> `Weight ~ Feed * Coop` 才会额外出一个 `Feed:Coop` 交互行。
+> **要谈交互作用，模型里就必须用 `*`，不能用 `+`。**
+
+## 2.5 交互作用可视化：分组箱线图 + 抖动散点
+
+```{r}
+ggplot(perfect_data, aes(x = Coop, y = Weight, fill = Feed)) +
+  # 箱线图按饲料分组错开；outlier.shape = NA 是因为异常值已在模块一剔除
+  geom_boxplot(
+    position      = position_dodge(width = 0.8),
+    outlier.shape = NA,
+    alpha         = 0.75
+  ) +
+  # 抖动散点：必须用 position_jitterdodge，才能与箱体逐一对应，避免点乱跑
+  geom_jitter(
+    aes(shape = Feed),
+    position = position_jitterdodge(jitter.width = 0.12, dodge.width = 0.8),
+    size     = 2.6,
+    alpha    = 0.9
+  ) +
+  # 映射用的是 fill，所以必须配 scale_fill_manual（而不是 scale_colour_manual）
+  scale_fill_manual(values  = c("标准" = "steelblue", "高级" = "tomato")) +
+  scale_shape_manual(values = c("标准" = 16, "高级" = 17)) +
+  labs(
+    title    = "各鸡舍不同饲料下的体重分布",
+    subtitle = "箱体表示四分位区间，散点为单个个体",
+    x        = "鸡舍",
+    y        = "体重 (g)",
+    fill     = "饲料类型",
+    shape    = "饲料类型"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title      = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle   = element_text(hjust = 0.5, color = "gray40"),
+    legend.position = "top"
+  )
+```
+
+> **三条绘图避坑要点（全部体现在上面这段代码里）**
+> 1. `position = "dodge"` 必须配合 `aes()` 里的分组变量使用；没有分组映射还写 dodge，图形会整体错位。
+> 2. 箱线图上叠散点，散点必须用 `position_jitterdodge()`，否则点和箱子对不上。
+> 3. `colour`（描边色）与 `fill`（填充色）是两套独立体系：映射了 `fill` 就用 `scale_fill_manual`，映射了 `colour` 才用 `scale_colour_manual`。混用会导致颜色完全不生效。
+
+## 2.6 小结
+
+通过对不同鸡舍和饲料组的分组统计与双因素方差分析，本报告量化了三件事：
+鸡舍之间的体重差异有多大、饲料之间的差异有多大、以及**两者的组合是否存在超出"单独相加"的额外效应**（即交互作用）。
+配合分组箱线图与抖动散点，可以直观看到分布的中心位置、离散程度与样本量，避免只看均值就下判断。
+
+# 模块三：机器学习——随机森林与特征重要性
+
+## 3.1 建模思路
+
+以 `Weight` 为目标变量，用 `Coop`、`Feed`、`Egg_Count`、`Day` 作为预测变量，
+采用随机森林（Random Forest）做回归预测。
+
+随机森林的优势：
+
+- 能自动捕捉变量之间的非线性关系与交互；
+- 对异常值、量纲差异不敏感，无需先做标准化；
+- 通过置换重要性（%IncMSE）直接给出**哪个变量最重要**；
+- 自带袋外（OOB）误差估计，能在样本量有限时给出相对可靠的泛化评估。
+
+## 3.2 切分训练集与测试集
+
+```{r}
+set.seed(2024)
+
+n <- nrow(perfect_data)
+train_idx <- sample(1:n, size = round(0.7 * n), replace = FALSE)
+
+train_data <- perfect_data[train_idx, ]
+test_data  <- perfect_data[-train_idx, ]
+
+cat("训练集：", nrow(train_data), "行　测试集：", nrow(test_data), "行\n")
+```
+
+> 为什么必须切分：如果拿全部数据建模、又拿同一批数据评估，模型等于"提前看过答案"，
+> 误差会被严重低估。留出 30% 的数据不参与训练，评估结果才有参考价值。
+
+## 3.3 随机森林建模
+
+```{r}
+# importance = TRUE 才会计算 %IncMSE，画特征重要性图必须开
+rf_mod <- randomForest(
+  Weight ~ Coop + Feed + Egg_Count + Day,
+  data       = train_data,
+  ntree      = 500,
+  importance = TRUE
+)
+
+rf_mod
+```
+
+> 输出里的 `% Var explained` 是模型解释的方差比例。
+> 本次训练集仅 `r nrow(train_data)` 行，样本量偏小，该值有可能为负数——这**不代表代码写错**，
+> 只代表在当前样本规模下模型没能学到有效规律，属于教学演示中的正常现象。
+
+## 3.4 特征重要性
+
+```{r}
+varImpPlot(
+  rf_mod,
+  main = "随机森林特征重要性（%IncMSE）"
+)
+```
+
+```{r}
+# 提取重要性表，并自动找出最重要的变量（供正文引用）
+imp <- importance(rf_mod)
+
+kable(
+  as.data.frame(imp),
+  caption = "表4 各变量重要性指标",
+  digits  = 2,
+  align   = "c"
+)
+
+top_var <- rownames(imp)[which.max(imp[, "%IncMSE"])]
+cat("对体重影响最大的变量是：", top_var, "\n")
+```
+
+> `%IncMSE` 的含义：把某个变量随机打乱后，模型误差平均上升多少百分比。
+> 上升越多，说明该变量越重要。数值接近 0 甚至为负，说明该变量对预测几乎没有贡献。
+
+## 3.5 计算 RMSE 误差
+
+```{r}
+# 对齐因子水平：防止测试集出现训练集没见过的分组导致 predict 报错
+test_data$Coop <- factor(test_data$Coop, levels = levels(train_data$Coop))
+test_data$Feed <- factor(test_data$Feed, levels = levels(train_data$Feed))
+
+pred_rf <- predict(rf_mod, newdata = test_data)
+
+rmse_val <- sqrt(mean((pred_rf - test_data$Weight)^2, na.rm = TRUE))
+mae_val  <- mean(abs(pred_rf - test_data$Weight), na.rm = TRUE)
+
+cat("均方根误差 RMSE =", round(rmse_val, 2), "\n")
+cat("平均绝对误差 MAE =", round(mae_val, 2), "\n")
+```
+
+## 3.6 真实值 vs 预测值对照图
+
+```{r}
+df_pred <- data.frame(
+  real = test_data$Weight,
+  pred = pred_rf
+)
+
+ggplot(df_pred, aes(x = real, y = pred)) +
+  geom_point(size = 3, color = "steelblue", alpha = 0.85) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linewidth = 1) +
+  coord_fixed(ratio = 1) +
+  labs(
+    title    = "真实体重 vs 随机森林预测值",
+    subtitle = "红线为完美预测基准线（y = x）",
+    x        = "真实体重 (g)",
+    y        = "预测体重 (g)"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title    = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, color = "gray40")
+  )
+```
+
+> 读图方法：点越贴近红色 45° 线，预测越准；点越分散，误差越大。
+> 若点整体偏向红线一侧，说明模型存在系统性高估或低估。
+
+## 3.7 结论
+
+模型显示，对体重影响最大的变量是 **`r top_var`**，
+模型的均方根误差为 **`r round(rmse_val, 2)`**。
+
+> **如何判断"预测效果良好"**：RMSE 必须和体重本身的量级放在一起看。
+> 本数据体重均值约 `r round(mean(perfect_data$Weight), 1)` g，
+> RMSE 占均值约 `r round(rmse_val / mean(perfect_data$Weight) * 100, 1)`%。
+> 一般经验：RMSE 低于均值的 10%～15% 可视为预测较可靠；超过 20% 说明模型解释力不足。
+> 孤立地报一个 RMSE 数字，是没有判断价值的。
+
+# 模块四：多语言对比——Python Pandas 初探
+
+## 4.1 分析动机
+
+为了验证数据的通用性，使用 Python 的 Pandas 库对同一份数据执行相同的读取与分组操作，
+再与 R 的结果逐项对照。
+
+核心目的不是"多学一门语言"，而是确认一件事：
+**同一种数据逻辑，在不同语言中只是写法不同，底层计算结果必须一致。**
+
+## 4.2 Python 代码（Pandas 分组均值）
+
+以下代码仅作展示，不在本文档内执行（原因见 4.3）。
+
+```python
+# Python + Pandas：与 R 完全同口径的分组均值
+import pandas as pd
+
+df = pd.read_csv("farm_data.csv")
+
+# 对应 R 的 group_by(Feed) %>% summarise(mean(Weight))
+print(df.groupby('Feed')['Weight'].mean())
+
+# 双分组：对应 R 的 group_by(Coop, Feed)
+print(df.groupby(['Coop', 'Feed'])['Weight'].agg(['mean', 'std', 'count']))
+
+# 紫色柱状图
+import matplotlib.pyplot as plt
+
+df.groupby('Feed')['Weight'].mean().plot(
+    kind='bar', color='mediumpurple', edgecolor='black'
+)
+plt.ylabel('平均体重 (g)')
+plt.title('Python: 不同饲料组平均体重')
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.savefig("python_bar.png", dpi=150)
+```
+
+## 4.3 在 R Markdown 中嵌入 Python 的两种方式
+
+| 方式 | 做法 | 优缺点 |
+|---|---|---|
+| **方式一：reticulate 直接执行** | 装 `reticulate` 包，用 `{python}` 代码块 | 真正跑代码，但 Python 环境一旦出错，整份报告全部 Knit 失败 |
+| **方式二：截图嵌入** | PyCharm 里跑一遍，截图放进报告 | 稳定、零风险，报告版面也好看 |
+
+本报告采用**方式二**，因为本报告的首要目标是"能一次编译成功"。
+
+如果确实想让 Python 真跑，把下面这个块的 `eval = FALSE` 改成 `eval = TRUE`
+（前提：已执行 `install.packages("reticulate")`，且本机 Python 可用）：
+
+```{r eval=FALSE}
+library(reticulate)
+
+# 方式 A：直接跑一个 Python 脚本
+source_python("farm_analysis.py")
+
+# 方式 B：在 R 里调用 Python 对象
+pd <- import("pandas")
+df <- pd$read_csv("farm_data.csv")
+df$groupby("Feed")["Weight"]$mean()
+```
+
+## 4.4 截图嵌入位置
+
+把两张截图命名为 `python_groupby.png` 和 `python_bar.png`，放进本报告所在文件夹，
+然后**删掉下面每行开头的 `<!--` 和行尾的 `-->`**，图片就会自动出现在这里。
+
+<!-- ![图4 Python Pandas 分组均值控制台输出](python_groupby.png) -->
+
+<!-- ![图5 Python 紫色柱状图：不同饲料组平均体重](python_bar.png) -->
+
+> 注意：图片文件不存在时务必保持注释状态，否则 Knit 会因为找不到图片文件而中断。
+
+## 4.5 R 与 Python 语法对照表
+
+| 操作 | R 写法 | Python（Pandas）写法 |
+|---|---|---|
+| 读 CSV | `read.csv("f.csv")` | `pd.read_csv("f.csv")` |
+| 筛行 | `filter(df, Weight > 450)` | `df[df["Weight"] > 450]` |
+| 新增列 | `mutate(df, z = Weight * 2)` | `df.assign(z = df["Weight"] * 2)` |
+| 分组均值 | `group_by(Feed) %>% summarise(m = mean(Weight))` | `df.groupby("Feed")["Weight"].mean()` |
+| 排序 | `arrange(df, desc(Weight))` | `df.sort_values("Weight", ascending=False)` |
+| 多表连接 | `left_join(a, b, by = "ID")` | `a.merge(b, on="ID", how="left")` |
+| 相关系数 | `cor(df$Weight, df$Egg_Count)` | `df["Weight"].cor(df["Egg_Count"])` |
+| 线性回归 | `lm(Weight ~ Day, data = df)` | `sklearn.linear_model.LinearRegression` |
+| 方差分析 | `aov(Weight ~ Feed * Coop, data = df)` | `statsmodels` 的 `ols` + `anova_lm` |
+
+## 4.6 结论
+
+Python 的 `groupby` 对应 R 的 `group_by`，语法虽然不同，但底层数据逻辑一致：
+**按分类变量切片，再对每组施加同一个聚合函数。** 两者算出的均值必然相同，
+因为执行的都是"分组—聚合"这一同一数学过程。
+
+真正的差异在于使用场景：
+
+- **R 更适合统计检验**：`t.test()`、`aov()`、`lm()` 一行出结果，自带完整统计输出，天然面向论文写作；
+- **Python 更适合工程化部署**：能直接接数据库、接 Web 服务，训练好的模型可以打包上线；
+- **清洗口径必须跨语言一致**：IQR 的倍数（1.5 还是 3）、缺失值处理方式（删除还是填补），
+  这些**规则**不因语言改变，只由分析者决定。换语言只是换工具，不能换标准。

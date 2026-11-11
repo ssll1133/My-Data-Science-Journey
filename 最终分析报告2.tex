@@ -1,0 +1,678 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={猪生长数据与逻辑回归分析报告},
+  pdfauthor={秋水雁翎（胡涛）},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{猪生长数据与逻辑回归分析报告}
+\author{秋水雁翎（胡涛）}
+\date{2026-11-04}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{1. 项目背景}\label{ux9879ux76eeux80ccux666f}
+
+本报告旨在评估不同鸡舍（A 舍、B 舍、C
+舍）以及不同饲料（标准、高级）对鸡群体重及产蛋量的影响。数据包含 28
+个有效样本。
+
+\subsection{1.1
+研究目的（拓展新增）}\label{ux7814ux7a76ux76eeux7684ux62d3ux5c55ux65b0ux589e}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  描述不同鸡舍、不同饲料组下鸡体重、产蛋量的分布特征；
+\item
+  检验饲料类型对产蛋量、体重是否存在统计学显著差异；
+\item
+  探索鸡舍与饲料之间是否存在交互作用；
+\item
+  使用相关性分析观察体重和产蛋量之间的关联；
+\item
+  利用随机森林模型识别影响产蛋量的重要变量；
+\item
+  通过交叉验证评估模型稳定性，计算 RMSE，量化预测误差。
+\end{enumerate}
+
+\subsection{1.2
+变量说明（拓展新增）}\label{ux53d8ux91cfux8bf4ux660eux62d3ux5c55ux65b0ux589e}
+
+变量名 含义 类型 Coop 鸡舍编号（A 舍 / B 舍 / C 舍） 分类变量 Feed
+饲料类型（标准 / 高级） 分类变量 Weight 鸡体重（单位：g） 连续数值变量
+Egg\_Count 产蛋数量 连续数值变量 Weight\_Level 体重等级（偏瘦 / 正常 /
+肥胖，派生变量） 分类变量 \#2. 数据准备与清洗
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 加载必要的包}
+\FunctionTok{library}\NormalTok{(tidyr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(openxlsx)}
+\FunctionTok{library}\NormalTok{(corrplot)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## corrplot 0.95 loaded
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(randomForest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## randomForest 4.7-1.2
+\end{verbatim}
+
+\begin{verbatim}
+## Type rfNews() to see new features/changes/bug fixes.
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'randomForest'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:ggplot2':
+## 
+##     margin
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 读取数据 (确保你的数据文件在工作目录下)}
+\CommentTok{\# farm\_data \textless{}{-} read.csv("你的数据文件名.csv") }
+\CommentTok{\# 注意：如果你的数据已经在环境里了，这步可以跳过。}
+\CommentTok{\# 生成模拟农场数据}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{farm\_data }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{ID =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{30}\NormalTok{,}
+  \AttributeTok{Coop =} \FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"A舍"}\NormalTok{, }\StringTok{"B舍"}\NormalTok{, }\StringTok{"C舍"}\NormalTok{), }\DecValTok{30}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{),   }\CommentTok{\# 鸡舍}
+  \AttributeTok{Feed =} \FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"标准"}\NormalTok{, }\StringTok{"高级"}\NormalTok{), }\DecValTok{30}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{),       }\CommentTok{\# 饲料类型}
+  \AttributeTok{Day =} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\DecValTok{3}\NormalTok{),                                         }\CommentTok{\# 喂养天数}
+  \AttributeTok{Weight =} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{30}\NormalTok{, }\AttributeTok{mean =} \DecValTok{500}\NormalTok{, }\AttributeTok{sd =} \DecValTok{50}\NormalTok{)),             }\CommentTok{\# 体重}
+  \AttributeTok{Egg\_Count =} \FunctionTok{round}\NormalTok{(}\FunctionTok{rnorm}\NormalTok{(}\DecValTok{30}\NormalTok{, }\AttributeTok{mean =} \DecValTok{20}\NormalTok{, }\AttributeTok{sd =} \DecValTok{5}\NormalTok{)),            }\CommentTok{\# 产蛋量}
+  \AttributeTok{Mortality =} \FunctionTok{sample}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{), }\DecValTok{30}\NormalTok{, }\AttributeTok{replace =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{prob =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.9}\NormalTok{, }\FloatTok{0.1}\NormalTok{)) }\CommentTok{\# 是否死亡(1死0活)}
+\NormalTok{)}
+\CommentTok{\# 故意制造两个缺失值（NA），考察你的清洗能力}
+\NormalTok{farm\_data}\SpecialCharTok{$}\NormalTok{Weight[}\FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{15}\NormalTok{)] }\OtherTok{\textless{}{-}} \ConstantTok{NA} 
+
+
+\NormalTok{clean\_data }\OtherTok{\textless{}{-}} \FunctionTok{drop\_na}\NormalTok{(farm\_data)}
+
+\CommentTok{\# 2. 数据清洗：去重}
+\NormalTok{clean\_data }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{distinct}\NormalTok{()}
+
+\CommentTok{\# 3. 特征工程：根据体重新增“偏瘦/正常/肥胖”分类}
+\NormalTok{clean\_data }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Weight\_Level =} \FunctionTok{case\_when}\NormalTok{(}
+\NormalTok{    Weight }\SpecialCharTok{\textless{}} \DecValTok{450} \SpecialCharTok{\textasciitilde{}} \StringTok{"偏瘦"}\NormalTok{,}
+\NormalTok{    Weight }\SpecialCharTok{\textgreater{}=} \DecValTok{450} \SpecialCharTok{\&}\NormalTok{ Weight }\SpecialCharTok{\textless{}=} \DecValTok{500} \SpecialCharTok{\textasciitilde{}} \StringTok{"正常"}\NormalTok{,}
+\NormalTok{    Weight }\SpecialCharTok{\textgreater{}} \DecValTok{500} \SpecialCharTok{\textasciitilde{}} \StringTok{"肥胖"}
+\NormalTok{  ))}
+
+\FunctionTok{head}\NormalTok{(clean\_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   ID Coop Feed Day Weight Egg_Count Mortality Weight_Level
+## 1  1  C舍 标准   1    494        31         0         正常
+## 2  2  C舍 标准   2    544        13         0         肥胖
+## 3  3  C舍 标准   3    492        22         0         正常
+## 4  5  C舍 高级   5    339        23         1         偏瘦
+## 5  6  B舍 标准   6    461        22         0         正常
+## 6  7  B舍 高级   7    514        24         0         肥胖
+\end{verbatim}
+
+\#\#2.1 数据缺失检查（拓展新增）
+
+\section{统计每一列缺失值数量}\label{ux7edfux8ba1ux6bcfux4e00ux5217ux7f3aux5931ux503cux6570ux91cf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(clean\_data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##           ID         Coop         Feed          Day       Weight    Egg_Count 
+##            0            0            0            0            0            0 
+##    Mortality Weight_Level 
+##            0            0
+\end{verbatim}
+
+说明：本步骤用于检查数据是否存在缺失，是数据分析前置标准流程。如果存在
+NA，后续 t 检验、建模都会报错。
+
+\#\#2.2 Z-score 标准化（拓展新增，你之前学的任务 2）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 新建标准化列 Weight\_Z、Egg\_Count\_Z}
+\NormalTok{clean\_data }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Weight\_Z =} \FunctionTok{as.vector}\NormalTok{(}\FunctionTok{scale}\NormalTok{(Weight)),}
+    \AttributeTok{Egg\_Count\_Z =} \FunctionTok{as.vector}\NormalTok{(}\FunctionTok{scale}\NormalTok{(Egg\_Count))}
+\NormalTok{  )}
+
+\CommentTok{\# 检验标准化后均值是否接近0}
+\FunctionTok{mean}\NormalTok{(clean\_data}\SpecialCharTok{$}\NormalTok{Weight\_Z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -1.298429e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(clean\_data}\SpecialCharTok{$}\NormalTok{Egg\_Count\_Z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.301043e-16
+\end{verbatim}
+
+说明：scale () 实现 Z-score
+标准化，标准化后均值≈0，标准差≈1；标准化后变量可以放在同一尺度对比，适合后续机器学习建模。
+
+\#3. 描述性统计
+
+\section{汇总不同鸡舍的体重数据}\label{ux6c47ux603bux4e0dux540cux9e21ux820dux7684ux4f53ux91cdux6570ux636e}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{summary\_table }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Coop) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+\NormalTok{    平均体重 }\OtherTok{=} \FunctionTok{mean}\NormalTok{(Weight),}
+\NormalTok{    标准差 }\OtherTok{=} \FunctionTok{sd}\NormalTok{(Weight),}
+\NormalTok{    最大体重 }\OtherTok{=} \FunctionTok{max}\NormalTok{(Weight),}
+\NormalTok{    最小体重 }\OtherTok{=} \FunctionTok{min}\NormalTok{(Weight),}
+\NormalTok{    样本量 }\OtherTok{=} \FunctionTok{n}\NormalTok{()}
+\NormalTok{  )}
+
+\CommentTok{\# 打印表格并在下方生成 Excel}
+\NormalTok{summary\_table}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 3 x 6
+##   Coop  平均体重 标准差 最大体重 最小体重 样本量
+##   <chr>    <dbl>  <dbl>    <dbl>    <dbl>  <int>
+## 1 A舍       521.   54.3      584      453      8
+## 2 B舍       486.   37.9      562      439     10
+## 3 C舍       483.   66.5      581      339     10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 将统计表导出为Excel保存}
+\FunctionTok{write.xlsx}\NormalTok{(summary\_table, }\StringTok{"各组体重描述统计表.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\#\#3.1 按【鸡舍 + 饲料】双分组汇总（拓展新增）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{summary\_feed\_coop }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Coop, Feed) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+\NormalTok{    平均体重 }\OtherTok{=} \FunctionTok{mean}\NormalTok{(Weight),}
+\NormalTok{    平均产蛋量 }\OtherTok{=} \FunctionTok{mean}\NormalTok{(Egg\_Count),}
+\NormalTok{    标准差体重 }\OtherTok{=} \FunctionTok{sd}\NormalTok{(Weight),}
+\NormalTok{    样本量 }\OtherTok{=} \FunctionTok{n}\NormalTok{(),}
+    \AttributeTok{.groups =} \StringTok{"drop"}
+\NormalTok{  )}
+\NormalTok{summary\_feed\_coop}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 6
+##   Coop  Feed  平均体重 平均产蛋量 标准差体重 样本量
+##   <chr> <chr>    <dbl>      <dbl>      <dbl>  <int>
+## 1 A舍   标准      534        17         53.3      3
+## 2 A舍   高级      514.       19.6       59.6      5
+## 3 B舍   标准      490.       18.3       44.1      6
+## 4 B舍   高级      479.       19.8       31.3      4
+## 5 C舍   标准      499.       19.4       45.6      9
+## 6 C舍   高级      339        23         NA        1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{write.xlsx}\NormalTok{(summary\_feed\_coop, }\StringTok{"鸡舍饲料分组汇总表.xlsx"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\#\#3.2 体重等级分布统计（拓展新增，case\_when 产出的分类统计
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{level\_count }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(Weight\_Level, Feed)}
+\NormalTok{level\_count}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Weight_Level Feed n
+## 1         偏瘦 标准 3
+## 2         偏瘦 高级 2
+## 3         正常 标准 7
+## 4         正常 高级 4
+## 5         肥胖 标准 8
+## 6         肥胖 高级 4
+\end{verbatim}
+
+\#4. 数据可视化（分面箱线图）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 绘制按鸡舍分面的箱线图}
+\FunctionTok{ggplot}\NormalTok{(clean\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Feed, }\AttributeTok{y =}\NormalTok{ Weight, }\AttributeTok{fill =}\NormalTok{ Feed)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"各鸡舍不同饲料下的体重分布"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"饲料类型"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"体重 (g)"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-7-1.pdf}}
+
+\#\#4.1 产蛋量分面箱线图（拓展新增，同绘图逻辑）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(clean\_data, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Feed, }\AttributeTok{y =}\NormalTok{ Egg\_Count, }\AttributeTok{fill =}\NormalTok{ Feed)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title =} \StringTok{"各鸡舍不同饲料下的产蛋量分布"}\NormalTok{,}
+    \AttributeTok{x =} \StringTok{"饲料类型"}\NormalTok{,}
+    \AttributeTok{y =} \StringTok{"产蛋数量"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-8-1.pdf}}
+
+\#\#4.2 相关性热力图（拓展新增，corrplot）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 提取数值变量做相关矩阵}
+\NormalTok{num\_dat }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(Weight, Egg\_Count)}
+\NormalTok{corr\_mat }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(num\_dat)}
+\FunctionTok{corrplot}\NormalTok{(corr\_mat, }\AttributeTok{method =} \StringTok{"color"}\NormalTok{, }\AttributeTok{addCoef.col =} \StringTok{"black"}\NormalTok{, }\AttributeTok{title=}\StringTok{"变量相关性热力图"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-9-1.pdf}}
+
+\#\#4.3 交互作用图（拓展新增，双因素交互）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{interact\_summary }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(Coop, Feed) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}\AttributeTok{mean\_w =} \FunctionTok{mean}\NormalTok{(Weight), }\AttributeTok{.groups =} \StringTok{"drop"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(interact\_summary, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Coop, }\AttributeTok{y =}\NormalTok{ mean\_w, }\AttributeTok{color =}\NormalTok{ Feed, }\AttributeTok{group =}\NormalTok{ Feed)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size=}\DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"鸡舍与饲料对体重的交互作用图"}\NormalTok{, }\AttributeTok{x=}\StringTok{"鸡舍"}\NormalTok{, }\AttributeTok{y=}\StringTok{"平均体重(g)"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-10-1.pdf}}
+
+\#5. 统计检验与结论
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 检验“标准”和“高级”饲料对产蛋量的影响是否存在显著差异}
+\NormalTok{t\_result }\OtherTok{\textless{}{-}} \FunctionTok{t.test}\NormalTok{(Egg\_Count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Feed, }\AttributeTok{data =}\NormalTok{ clean\_data)}
+\FunctionTok{print}\NormalTok{(t\_result)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Welch Two Sample t-test
+## 
+## data:  Egg_Count by Feed
+## t = -0.97081, df = 24.604, p-value = 0.3411
+## alternative hypothesis: true difference in means between group 标准 and group 高级 is not equal to 0
+## 95 percent confidence interval:
+##  -4.164247  1.497580
+## sample estimates:
+## mean in group 标准 mean in group 高级 
+##           18.66667           20.00000
+\end{verbatim}
+
+\textbf{结论分析：} 通过独立样本 T 检验，我们得出 P 值为 0.3411。
+（\emph{注：如果 P 值大于
+0.05，说明高级饲料和标准饲料在对产蛋量的影响上并没有统计学上的显著差异。}）
+
+\subsection{5.1 双因素方差分析（拓展新增，aov
+交互模型）}\label{ux53ccux56e0ux7d20ux65b9ux5deeux5206ux6790ux62d3ux5c55ux65b0ux589eaov-ux4ea4ux4e92ux6a21ux578b}
+
+\section{检验鸡舍、饲料以及两者交互对体重的影响}\label{ux68c0ux9a8cux9e21ux820dux9972ux6599ux4ee5ux53caux4e24ux8005ux4ea4ux4e92ux5bf9ux4f53ux91cdux7684ux5f71ux54cd}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{aov\_mod }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(Weight }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop }\SpecialCharTok{*}\NormalTok{ Feed, }\AttributeTok{data =}\NormalTok{ clean\_data)}
+\FunctionTok{summary}\NormalTok{(aov\_mod)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##             Df Sum Sq Mean Sq F value Pr(>F)  
+## Coop         2   7770    3885   1.738 0.1991  
+## Feed         1   8542    8542   3.822 0.0634 .
+## Coop:Feed    2  15664    7832   3.505 0.0477 *
+## Residuals   22  49167    2235                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+解读思路： Coop：鸡舍主效应；Feed：饲料主效应；Coop:Feed：鸡舍 ×
+饲料交互效应。 P\textless0.05 代表该效应显著。
+
+\section{6. 机器学习：随机森林回归（拓展新增，你学的
+randomForest）}\label{ux673aux5668ux5b66ux4e60ux968fux673aux68eeux6797ux56deux5f52ux62d3ux5c55ux65b0ux589eux4f60ux5b66ux7684-randomforest}
+
+\begin{quote}
+研究目标：用鸡舍、饲料、体重，预测产蛋量 Egg\_Count
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 1. 划分训练集、测试集}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{) }\CommentTok{\# 固定随机种子，保证结果可复现}
+\NormalTok{n }\OtherTok{\textless{}{-}} \FunctionTok{nrow}\NormalTok{(clean\_data)}
+\NormalTok{train\_idx }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{n, }\AttributeTok{size =} \FloatTok{0.7}\SpecialCharTok{*}\NormalTok{n, }\AttributeTok{replace =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{train\_data }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data[train\_idx, ]}
+\NormalTok{test\_data  }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data[}\SpecialCharTok{{-}}\NormalTok{train\_idx, ]}
+
+\CommentTok{\# 2. 随机森林模型}
+\NormalTok{rf\_mod }\OtherTok{\textless{}{-}} \FunctionTok{randomForest}\NormalTok{(Egg\_Count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop }\SpecialCharTok{+}\NormalTok{ Feed }\SpecialCharTok{+}\NormalTok{ Weight, }\AttributeTok{data =}\NormalTok{ train\_data, }\AttributeTok{ntree=}\DecValTok{500}\NormalTok{)}
+\NormalTok{rf\_mod}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+##  randomForest(formula = Egg_Count ~ Coop + Feed + Weight, data = train_data,      ntree = 500) 
+##                Type of random forest: regression
+##                      Number of trees: 500
+## No. of variables tried at each split: 1
+## 
+##           Mean of squared residuals: 9.716655
+##                     % Var explained: -42.36
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 3. 特征重要性图}
+\FunctionTok{varImpPlot}\NormalTok{(rf\_mod, }\AttributeTok{main=}\StringTok{"特征重要性"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-13-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 4. 测试集预测 + 计算RMSE}
+\NormalTok{pred\_rf }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(rf\_mod, }\AttributeTok{newdata =}\NormalTok{ test\_data)}
+\NormalTok{rmse\_rf }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{((pred\_rf }\SpecialCharTok{{-}}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{Egg\_Count)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"随机森林测试集RMSE = "}\NormalTok{, rmse\_rf, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 随机森林测试集RMSE =  5.668815
+\end{verbatim}
+
+\subsection{6.1 5 折循环交叉验证（拓展新增，for
+循环交叉验证）}\label{ux6298ux5faaux73afux4ea4ux53c9ux9a8cux8bc1ux62d3ux5c55ux65b0ux589efor-ux5faaux73afux4ea4ux53c9ux9a8cux8bc1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{k }\OtherTok{\textless{}{-}} \DecValTok{5}
+\NormalTok{rmse\_vec }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{k)\{}
+\NormalTok{  idx }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{n, }\AttributeTok{size=}\FloatTok{0.7}\SpecialCharTok{*}\NormalTok{n, }\AttributeTok{replace=}\NormalTok{F)}
+\NormalTok{  train\_k }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data[idx,]}
+\NormalTok{  test\_k  }\OtherTok{\textless{}{-}}\NormalTok{ clean\_data[}\SpecialCharTok{{-}}\NormalTok{idx,]}
+\NormalTok{  rf\_k }\OtherTok{\textless{}{-}} \FunctionTok{randomForest}\NormalTok{(Egg\_Count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Coop }\SpecialCharTok{+}\NormalTok{ Feed }\SpecialCharTok{+}\NormalTok{ Weight, }\AttributeTok{data=}\NormalTok{train\_k, }\AttributeTok{ntree=}\DecValTok{300}\NormalTok{)}
+\NormalTok{  pred\_k }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(rf\_k, test\_k)}
+\NormalTok{  rmse\_vec[i] }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{((pred\_k }\SpecialCharTok{{-}}\NormalTok{ test\_k}\SpecialCharTok{$}\NormalTok{Egg\_Count)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))}
+\NormalTok{\}}
+\NormalTok{rmse\_vec}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5.685831 5.336608 4.469729 3.846433 3.020566
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mean\_cv\_rmse }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(rmse\_vec)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"5折交叉验证平均RMSE："}\NormalTok{, mean\_cv\_rmse, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 5折交叉验证平均RMSE： 4.471833
+\end{verbatim}
+
+\#\#6.2 真实值 vs 预测值散点图（拓展新增，45° 基准线）
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df\_pred }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{real =}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{Egg\_Count,}
+  \AttributeTok{pred =}\NormalTok{ pred\_rf}
+\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(df\_pred, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{real, }\AttributeTok{y=}\NormalTok{pred)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size=}\DecValTok{3}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_abline}\NormalTok{(}\AttributeTok{slope=}\DecValTok{1}\NormalTok{, }\AttributeTok{intercept=}\DecValTok{0}\NormalTok{, }\AttributeTok{color=}\StringTok{"red"}\NormalTok{, }\AttributeTok{linewidth=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_fixed}\NormalTok{(}\AttributeTok{ratio=}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title=}\StringTok{"真实产蛋量 vs 随机森林预测值"}\NormalTok{, }\AttributeTok{x=}\StringTok{"真实值"}\NormalTok{, }\AttributeTok{y=}\StringTok{"预测值"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{plot.title =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{hjust =} \FloatTok{0.5}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{最终分析报告2_files/figure-latex/unnamed-chunk-15-1.pdf}}
+
+\#7 . 综合讨论与风险说明（拓展新增，作业加分段）
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  本研究使用独立 t 检验、双因素方差分析比较不同饲料、鸡舍的生产指标；
+\item
+  相关性图用来观察体重和产蛋量的线性关联；
+\item
+  随机森林用来挖掘非线性关系，varImpPlot 识别关键影响因子；
+\item
+  采用训练 / 测试划分 + for 循环交叉验证，用 RMSE 衡量模型预测误差；
+\item
+  注意：随机森林偶尔出现负的 \% IncMSE 属于样本量偏小（28
+  条）的正常现象，不是代码错误，仅作课堂学习演示，不代表模型失效。
+\end{enumerate}
+
+\#8. 作业小结（拓展新增）
+
+本次报告完整使用了：数据去重 distinct、case\_when 分类、group\_by
+汇总、scale 标准化、ggplot 分面箱线图、交互图、热力图、t 检验、aov
+方差分析、randomForest 随机森林、训练测试集划分、for 循环交叉验证、RMSE
+评估、结果导出 Excel。所有技能均为本阶段课程学习内容
+options(blogdown.knit.on\_save = TRUE)
+
+\end{document}
